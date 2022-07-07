@@ -21,20 +21,30 @@ public class FightRules : MonoBehaviour
         
     }
 
-    public void CalcClimate()
+    public void CalcClimate() // рассчитывается при нажатии кнопки "Ready" 
     {
-        _TotalClimate = DataHolder._GeneralClimate; 
-
+        _TotalClimate = DataHolder._GeneralClimate; // достаём глобальное поле
+        
         for (int i = 0; i < 3; i++)
         {
             _climatePresident[i] = _FactorSlotPresident[i]._climate;
             if (_climatePresident[i] != _TotalClimate)
-            {
-                Debug.Log("Климат не совпал");
+            {   
+                // Климат на совпал 
+                _FactorSlotPresident[i]._buff_attack += -1;
+                _FactorSlotPresident[i]._buff_diplomation += -1;
+                _FactorSlotPresident[i]._buff_fortune += -1;
+                _FactorSlotPresident[i]._buff_protection += -1;
+                Debug.Log("_111");
+
             }
             else 
             {
-                Debug.Log("Климат совпал"); 
+                // Климат совпал
+                _FactorSlotPresident[i]._buff_attack += 2;
+                _FactorSlotPresident[i]._buff_diplomation += 2;
+                _FactorSlotPresident[i]._buff_fortune += 2;
+                _FactorSlotPresident[i]._buff_protection += 2;
             }
         }
     }
@@ -43,11 +53,11 @@ public class FightRules : MonoBehaviour
     {
         for (int i = 0; i < 3; i++)
         {
-            MoralePresident[i] = _FactorSlotPresident[i]._buff_attack + _FactorSlotPresident[i]._buff_diplomation + _FactorSlotPresident[i]._buff_fortune + _FactorSlotPresident[i]._buff_protection;
+            MoralePresident[i] = _FactorSlotPresident[i]._BUFFmaterials + _FactorSlotPresident[i]._BUFFeconomic + _FactorSlotPresident[i]._BUFFhealth + _FactorSlotPresident[i]._BUFFfood;
             _totalMoralePresident += MoralePresident[i];
         }
         Debug.Log("Общая мораль - " + _totalMoralePresident);
         _canvasCamera.transform.Find("Text_TotalMorale").GetComponent<Text>().text = "You morale " + _totalMoralePresident;
-        _canvasCamera.transform.Find("Text_TotalMoraleEnemy").GetComponent<Text>().text = "Enemy morale " + _totalMoralePresident;
+        _canvasCamera.transform.Find("Text_TotalMoraleEnemy").GetComponent<Text>().text = "Enemy morale "; // + _totalMoralePresident;
     }
 } 

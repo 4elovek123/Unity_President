@@ -207,5 +207,10 @@ void calc(int k)
         _economic_ability_attack = 0;
         _health_ability_protect = 0;
         _food_ability_protect = myItemList.player[j].food_ability_protect; 
-    } 
+    }
+
+    void Update()
+    {
+
+    }
 }
