@@ -17,7 +17,8 @@
 			"factor_health": "Гражданская война и борьба с внешними интервентами научили вас быстро восстанавливаться. Пониженный урон здравоохранения у всех соседей по климатическому поясу",
 			"health_ability_protect": 1, 
 			"factor_food": "Освоение свободных земель и Homestead Act дали Вам невероятно эффективный аграрный сектор. Health steal при атаке на продовольствие",
-			"food_ability_protect": 1
+			"food_ability_protect": 1, 
+			"food_ability_attack": 0
 		}, 
 
 		{
@@ -37,7 +38,8 @@
 			"factor_health": "",
 			"health_ability_protect": 0, 
 			"factor_food": "Вы слышите волю простых крестьян и в благодарность они трудятся усерднее. После каждой удачной атаки на вас продвольствие восстанавливается на N",
-			"food_ability_protect": 1
+			"food_ability_protect": 1, 
+			"food_ability_attack": 0
 		}, 
 
 		{
@@ -57,7 +59,8 @@
 			"factor_health": "",
 			"health_ability_protect": 0, 
 			"factor_food": "",
-			"food_ability_protect": 0
+			"food_ability_protect": 0, 
+			"food_ability_attack": 0
 		}, 
 
 		{
@@ -77,7 +80,8 @@
 			"factor_health": "",
 			"health_ability_protect": 0, 
 			"factor_food": "Вы слышите волю простых крестьян и в благодарность они трудятся усерднее. После каждой удачной атаки на вас продвольствие восстанавливается на N",
-			"food_ability_protect": 1
+			"food_ability_protect": 1, 
+			"food_ability_attack": 0
 		}, 
 
 		{
@@ -97,7 +101,8 @@
 			"factor_health": "Ваш вклад в законотворчество укрепил экономику. Защита здравоохранения вас и всех союзников в колоде увеличена",
 			"health_ability_protect": 1, 
 			"factor_food": "",
-			"food_ability_protect": 0
+			"food_ability_protect": 0, 
+			"food_ability_attack": 0
 		}, 
 
 		{
@@ -117,7 +122,8 @@
 			"factor_health": "",
 			"health_ability_protect": 0, 
 			"factor_food": "Прекрасный климат вашей страны дарит бесконечные хорошие урожаи. Продовольствие прирастает на N после любой атаки соперника",
-			"food_ability_protect": 1
+			"food_ability_protect": 1, 
+			"food_ability_attack": 0
 		}
 	]
 }

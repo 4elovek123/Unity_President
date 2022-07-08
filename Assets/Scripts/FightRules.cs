@@ -5,59 +5,81 @@ using UnityEngine.UI;
 
 public class FightRules : MonoBehaviour
 {
-    public Factor_Slot[] _FactorSlotPresident = new Factor_Slot[3];
-    public GameObject[] _President = new GameObject[3];
-    public GameObject[] _EnemyPresident = new GameObject[3];
+    public Factor_Item[] _FactorItemPresident = new Factor_Item[3];
+    //public GameObject[] _President = new GameObject[3];
+    //public GameObject[] _EnemyPresident = new GameObject[3];
 
     int[] MoralePresident = new int[3];
     int[] MoralePresidentEnemy = new int[3];
     int _totalMoralePresident = 0;
     public Canvas _canvasCamera;
+    public Transform[] _Presidents_before;
+    public Transform[] _PresidentsEnemy_before;
+    public Transform[] _Place_after; 
+    public Transform[] _PlaceEnemy_after;
 
-    string _TotalClimate = "";
-    string[] _climatePresident = new string[3];
+    public Transform _FactorEconomic;
+    public Transform _FactorHealth;
+    public Transform _FactorMaterials; 
+    public Transform _FactorFood;
+
+    private Factor_Item[] _scriptFactorItem;
+
+    //Transform _rootGO;
+    //private Transform _son; // сын 
+
     void Start()
     {
-        
+
     }
 
-    public void CalcClimate() // рассчитывается при нажатии кнопки "Ready" 
+    public void StartButton()
     {
-        _TotalClimate = DataHolder._GeneralClimate; // достаём глобальное поле
-        
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < _Presidents_before.Length; i++)
         {
-            _climatePresident[i] = _FactorSlotPresident[i]._climate;
-            if (_climatePresident[i] != _TotalClimate)
-            {   
-                // Климат на совпал 
-                _FactorSlotPresident[i]._buff_attack += -1;
-                _FactorSlotPresident[i]._buff_diplomation += -1;
-                _FactorSlotPresident[i]._buff_fortune += -1;
-                _FactorSlotPresident[i]._buff_protection += -1;
-                Debug.Log("_111");
+            _Presidents_before[i].transform.SetParent(_Place_after[i].transform);
+            _Presidents_before[i].transform.localPosition = Vector3.zero;
+            _Presidents_before[i].transform.localRotation = Quaternion.identity;
+            _Presidents_before[i].transform.localScale = Vector3.one;
+            _Presidents_before[i].transform.GetComponent<Image>().enabled = false;
+            _Presidents_before[i].transform.Find("Text_Factor").GetComponent<Text>().enabled = false;
+            _Presidents_before[i].transform.Find("Text_Abilities").GetComponent<Text>().enabled = false;
+            _Presidents_before[i].transform.Find("Card").GetComponent<CanvasGroup>().blocksRaycasts = false; //временное решение. Выключаем канвасгрупп рейкаст, чтобы не смогли попасть по UI президентов, когда сидим за столом 
+        }
 
-            }
-            else 
-            {
-                // Климат совпал
-                _FactorSlotPresident[i]._buff_attack += 2;
-                _FactorSlotPresident[i]._buff_diplomation += 2;
-                _FactorSlotPresident[i]._buff_fortune += 2;
-                _FactorSlotPresident[i]._buff_protection += 2;
+        for (int i = 0; i < _PresidentsEnemy_before.Length; i++)
+        {
+            _PresidentsEnemy_before[i].transform.SetParent(_PlaceEnemy_after[i].transform);
+            _PresidentsEnemy_before[i].transform.localPosition = Vector3.zero;
+            _PresidentsEnemy_before[i].transform.localRotation = Quaternion.identity;
+            _PresidentsEnemy_before[i].transform.localScale = Vector3.one;
+            _PresidentsEnemy_before[i].transform.GetComponent<Image>().enabled = false;
+            _PresidentsEnemy_before[i].transform.Find("Text_Factor").GetComponent<Text>().enabled = false;
+            _PresidentsEnemy_before[i].transform.Find("Text_Abilities").GetComponent<Text>().enabled = false;
+            _PresidentsEnemy_before[i].transform.Find("Card").GetComponent<CanvasGroup>().blocksRaycasts = false; //временное решение. Выключаем канвасгрупп рейкаст, чтобы не смогли попасть по UI президентов, когда сидим за столом 
+        }
+
+        ReadyFight();
+        /*
+        for (int i = 0; i < _PresidentsEnemy_before.Length; i++)
+        {
+            if (_scriptFactorItem[i]._enterFactor == "Economic")
+            { 
+                
             }
         }
+        */
+        
     }
-
     public void ReadyFight() // рассчитывается при нажатии кнопки "Ready" 
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++) // считаем мораль 
         {
-            MoralePresident[i] = _FactorSlotPresident[i]._BUFFmaterials + _FactorSlotPresident[i]._BUFFeconomic + _FactorSlotPresident[i]._BUFFhealth + _FactorSlotPresident[i]._BUFFfood;
+            MoralePresident[i] = _FactorItemPresident[i]._BUFFmaterials + _FactorItemPresident[i]._BUFFeconomic + _FactorItemPresident[i]._BUFFhealth + _FactorItemPresident[i]._BUFFfood;
             _totalMoralePresident += MoralePresident[i];
         }
-        Debug.Log("Общая мораль - " + _totalMoralePresident);
+
         _canvasCamera.transform.Find("Text_TotalMorale").GetComponent<Text>().text = "You morale " + _totalMoralePresident;
         _canvasCamera.transform.Find("Text_TotalMoraleEnemy").GetComponent<Text>().text = "Enemy morale "; // + _totalMoralePresident;
-    }
+    } 
 } 

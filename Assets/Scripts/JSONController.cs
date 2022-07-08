@@ -29,6 +29,7 @@ public class JSONController : MonoBehaviour
         public int health_ability_protect;
         public string factor_food;
         public int food_ability_protect;
+        public int food_ability_attack;
     }
 
     [System.Serializable]
