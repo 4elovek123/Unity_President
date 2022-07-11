@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 39ed5fbb21044db46900dabafc4136cf
+guid: 38652fe69367b344bbdfed376bb7db7d
 ModelImporter:
   serializedVersion: 22102
   internalIDToNameTable: []
@@ -7,8 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: warehouse
-    second: {fileID: 2100000, guid: a0bd3ac2f5a5f574fae9825b3d9e9e74, type: 2}
+      name: sunction
+    second: {fileID: 2100000, guid: 160766c0af0cf6b499ac45b8d8282022, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -94,7 +94,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.01
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0

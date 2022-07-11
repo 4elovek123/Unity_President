@@ -1,0 +1,120 @@
+{
+	"fight_card": [
+		{
+			"id": "sunction",
+			"cost": 2, 
+			"materials": 0,
+			"economic": 1,
+			"health": 0, 
+			"food": 0, 
+			"attack": 1, 
+			"protect":0,
+			"diplomation":0, 
+			"fortune": 0
+		}, 
+
+		{
+			"id": "military",
+			"cost": 3, 
+			"materials": 0,
+			"economic": 0,
+			"health": 0, 
+			"food": 1, 
+			"attack": 0, 
+			"protect": 1,
+			"diplomation": 0, 
+			"fortune": 0
+		}, 
+
+		{
+			"id": "isolation",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 0, 
+			"attack": 1, 
+			"protect": 0,
+			"diplomation":0, 
+			"fortune": 0
+		}, 
+
+		{
+			"id": "int_data",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 0, 
+			"attack": 1, 
+			"protect":0,
+			"diplomation":0, 
+			"fortune": 0
+		}, 
+
+		{
+			"id": "elections",
+			"cost": 3, 
+			"materials": 0,
+			"economic": 0,
+			"health": 0, 
+			"food": 1, 
+			"attack": 0, 
+			"protect":0,
+			"diplomation":0, 
+			"fortune": 1
+		}, 
+
+		{
+			"id": "educational",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 1, 
+			"attack": 0, 
+			"protect":0,
+			"diplomation":0, 
+			"fortune": 1
+		}, 
+
+			{
+			"id": "accession",
+			"cost": 3, 
+			"materials": 0,
+			"economic": 0,
+			"health": 1, 
+			"food": 1, 
+			"attack": 0, 
+			"protect": 1,
+			"diplomation":0, 
+			"fortune": 0
+		}, 
+		
+		{
+			"id": "HARVEST",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 0, 
+			"attack": 0, 
+			"protect":0,
+			"diplomation":0, 
+			"fortune": 1
+		}, 
+
+		{
+			"id": "isolation2",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 0, 
+			"attack": 1, 
+			"protect": 0,
+			"diplomation":0, 
+			"fortune": 0
+		}
+	]
+}
