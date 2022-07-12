@@ -1,10 +1,114 @@
 {
 	"fight_card": [
 		{
-			"id": "sunction",
+			"id": "airStrike",
+			"cost": 2, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 0, 
+			"attack": 1, 
+			"protect":0,
+			"diplomation":0, 
+			"fortune": 0
+		}, 
+		
+		{
+			"id": "accession",
 			"cost": 2, 
 			"materials": 0,
+			"economic": 0,
+			"health": 1, 
+			"food": 1, 
+			"attack": 0, 
+			"protect":1,
+			"diplomation":0, 
+			"fortune": 0
+		}, 
+		
+		{
+			"id": "customsReform",
+			"cost": 2, 
+			"materials": 0,
+			"economic": 0,
+			"health": 0, 
+			"food": 1, 
+			"attack": 0, 
+			"protect":1,
+			"diplomation":0, 
+			"fortune": 0
+		}, 
+
+		{
+			"id": "diplomaticImmunty",
+			"cost": 3, 
+			"materials": 0,
+			"economic": 0,
+			"health": 1, 
+			"food": 0, 
+			"attack": 0, 
+			"protect":0,
+			"diplomation":1, 
+			"fortune": 0
+		}, 
+
+		{
+			"id": "educationalInfrastructure",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 1, 
+			"attack": 0, 
+			"protect": 0,
+			"diplomation": 0, 
+			"fortune": 1
+		}, 
+
+		{
+			"id": "elections",
+			"cost": 3, 
+			"materials": 0,
+			"economic": 0,
+			"health": 0, 
+			"food": 1, 
+			"attack": 0, 
+			"protect": 0,
+			"diplomation":0, 
+			"fortune": 1
+		}, 
+
+		{
+			"id": "energyExpansion",
+			"cost": 3, 
+			"materials": 0,
 			"economic": 1,
+			"health": 1, 
+			"food": 0, 
+			"attack": 0, 
+			"protect":0,
+			"diplomation":0, 
+			"fortune": 1
+		}, 
+
+		{
+			"id": "harvest",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 0, 
+			"attack": 0, 
+			"protect":0,
+			"diplomation":0, 
+			"fortune": 1
+		}, 
+
+		{
+			"id": "intelligenceData",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
 			"health": 0, 
 			"food": 0, 
 			"attack": 1, 
@@ -13,20 +117,7 @@
 			"fortune": 0
 		}, 
 
-		{
-			"id": "military",
-			"cost": 3, 
-			"materials": 0,
-			"economic": 0,
-			"health": 0, 
-			"food": 1, 
-			"attack": 0, 
-			"protect": 1,
-			"diplomation": 0, 
-			"fortune": 0
-		}, 
-
-		{
+			{
 			"id": "isolation",
 			"cost": 3, 
 			"materials": 1,
@@ -38,83 +129,83 @@
 			"diplomation":0, 
 			"fortune": 0
 		}, 
-
+		
 		{
-			"id": "int_data",
+			"id": "militaryPosition",
 			"cost": 3, 
-			"materials": 1,
+			"materials": 0,
 			"economic": 0,
 			"health": 0, 
-			"food": 0, 
-			"attack": 1, 
-			"protect":0,
+			"food": 1, 
+			"attack": 0, 
+			"protect":1,
 			"diplomation":0, 
 			"fortune": 0
 		}, 
 
 		{
-			"id": "elections",
+			"id": "patronage",
 			"cost": 3, 
 			"materials": 0,
-			"economic": 0,
+			"economic": 1,
 			"health": 0, 
-			"food": 1, 
+			"food": 0, 
 			"attack": 0, 
 			"protect":0,
-			"diplomation":0, 
-			"fortune": 1
+			"diplomation": 1, 
+			"fortune": 0
 		}, 
-
+		
 		{
-			"id": "educational",
-			"cost": 3, 
-			"materials": 1,
-			"economic": 0,
-			"health": 0, 
-			"food": 1, 
-			"attack": 0, 
-			"protect":0,
-			"diplomation":0, 
-			"fortune": 1
-		}, 
-
-			{
-			"id": "accession",
+			"id": "pestControl",
 			"cost": 3, 
 			"materials": 0,
 			"economic": 0,
 			"health": 1, 
-			"food": 1, 
+			"food": 0, 
 			"attack": 0, 
 			"protect": 1,
 			"diplomation":0, 
 			"fortune": 0
 		}, 
-		
-		{
-			"id": "HARVEST",
-			"cost": 3, 
-			"materials": 1,
-			"economic": 0,
-			"health": 0, 
-			"food": 0, 
-			"attack": 0, 
-			"protect":0,
-			"diplomation":0, 
-			"fortune": 1
-		}, 
 
 		{
-			"id": "isolation2",
+			"id": "strategicLoan",
 			"cost": 3, 
-			"materials": 1,
-			"economic": 0,
+			"materials": 0,
+			"economic": 1,
+			"health": 1, 
+			"food": 0, 
+			"attack": 0, 
+			"protect": 0,
+			"diplomation":1, 
+			"fortune": 0
+		}, 
+		
+		{
+			"id": "sunction",
+			"cost": 3, 
+			"materials": 0,
+			"economic": 1,
 			"health": 0, 
 			"food": 0, 
 			"attack": 1, 
-			"protect": 0,
+			"protect":0,
 			"diplomation":0, 
 			"fortune": 0
+		}, 
+
+		{
+			"id": "techological",
+			"cost": 3, 
+			"materials": 1,
+			"economic": 0,
+			"health": 0, 
+			"food": 1, 
+			"attack": 0, 
+			"protect": 0,
+			"diplomation":0, 
+			"fortune": 1
 		}
 	]
 }

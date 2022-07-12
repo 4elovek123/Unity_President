@@ -44,8 +44,12 @@ public class FightRules : MonoBehaviour
 
     public JSONController_Card jSONControllerCard;
     JSONController_Card.ItemListCard myItemListCard;
-    public Transform[] _FightCardInScene;
-    private int counter_card = 0; // передаём номер президента из массива карт (j в цикле) 
+    private Transform[] _FightCardInScene;
+    public Transform[] _FightCardOnTable; // Массив боевых карт на столе 
+    private Transform[] _FightCardPlace;
+    public GameObject Folder_FightCardPlace;
+    public GameObject Folder_FightCardInScene;
+    // private int counter_card = 0; // передаём номер карты из массива карт (j в цикле) 
     public int _costCard = 0;
     private int _materialsCard = 0;
     private int _economicCard = 0;
@@ -57,18 +61,62 @@ public class FightRules : MonoBehaviour
     private int _fortuneCard = 0;
 
     private bool _helper=true;
+    private bool _boolSwitch = true;
 
     //Transform _rootGO;
     //private Transform _son; // сын 
 
     void Start()
     {
+        
+    }
 
+    public void RandomCardToPlace() // заносим в массивы все карты сцены, места для карт за столом, выбираем рандомные, помещаем за стол. Рассчитывается при нажатии кнопки "Ready" 
+    {
+        _FightCardInScene = new Transform[Folder_FightCardInScene.transform.childCount];
+        for (int i = 0; i < _FightCardInScene.Length; i++) // пробежались по всем боевым картам в сцене в папке FightCardInScene (16 штук сейчас) 
+        {
+            _FightCardInScene[i] = Folder_FightCardInScene.transform.GetChild(i).transform; // занесли их в массив _FightCardInScene[]
+        }
+
+        _FightCardPlace = new Transform[Folder_FightCardPlace.transform.childCount];
+        _FightCardOnTable = new Transform[_FightCardPlace.Length];
+
+
+        int[] _random = new int[_FightCardPlace.Length]; // формируем упорядоченный массив с 0 до _FightCardPlace.Length (до 9 включительно)
+        for (int i = 0; i < _random.Length; i++) { _random[i] =i; }
+
+        int[] Mix(int[] num) // перемешиваем его 
+        {
+            for (int i = 0; i < num.Length; i++)
+            {
+                int currentValue = num[i];
+                int randomIndex = Random.Range(i, num.Length);
+                num[i] = num[randomIndex];
+                num[randomIndex] = currentValue;
+            }
+            return num;
+        }
+
+        int[] MixArray = Mix(_random); // перемешанный массив для выбора случайных карт
+
+        for (int i = 0; i < _FightCardPlace.Length; i++) // пробежались по всем Place будущих карт 
+        {
+            _FightCardPlace[i] = Folder_FightCardPlace.transform.GetChild(i).transform; // занесли их в массив _FightCardPlace[] 
+            _FightCardOnTable[i] = _FightCardInScene[MixArray[i]]; // заполнили массив случайными картами
+                //_FightCardOnTable[i] = Instantiate(_FightCardInScene[_random], Vector3.zero, Quaternion.identity); // скопировали рандомный префаб из массива _FightCardInScene в массив OnTable. Возможны повторения карт 
+                //_FightCardOnTable[i].name = _FightCardInScene[_random].name; // задаём такое же имя, как у оригинала (без приставки Clone) 
+            _FightCardOnTable[i].transform.SetParent(_FightCardPlace[i]); // поместили боевые карты в Place[] 
+            _FightCardOnTable[i].transform.localPosition = Vector3.zero; // сбросили позицию
+            _FightCardOnTable[i].transform.localRotation = Quaternion.identity; // сбросили вращение 
+
+                //Debug.Log("_FightCardOnTable[" + i + "] = " + _FightCardOnTable[i]);
+        }
     }
 
     public void StartButton()
     {
-        for (int i = 0; i < _Presidents_before.Length; i++)
+        for (int i = 0; i < _Presidents_before.Length; i++) // переносим UI президентов 
         {
             _Presidents_before[i].transform.SetParent(_Place_after[i].transform);
             _Presidents_before[i].transform.localPosition = Vector3.zero;
@@ -105,7 +153,7 @@ public class FightRules : MonoBehaviour
         calcLocationFactorsEnemy(); 
     }
 
-    void calcLocationFactorsOur()
+    void calcLocationFactorsOur() // расставляем наши факторы, пока топорно без зависимости от выбора президента
     {
         _FactorMaterials.transform.SetParent(_PlaceFactor[0]);
         _FactorMaterials.transform.localPosition = Vector3.zero;
@@ -132,7 +180,7 @@ public class FightRules : MonoBehaviour
         _PlaceFactor[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFhealth; // хп здравоохранения 
     }
 
-    void calcLocationFactorsEnemy()
+    void calcLocationFactorsEnemy() // расставляем факторы врага 
     {
         _FactorMaterialsEnemy.transform.SetParent(_PlaceFactorEnemy[0]);
         _FactorMaterialsEnemy.transform.localPosition = Vector3.zero;
@@ -159,15 +207,42 @@ public class FightRules : MonoBehaviour
         _PlaceFactorEnemy[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFhealth; // хп здравоохранения 
     }
 
-    void FightCard(int k)
+
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0) && _helper == true) // если щелкнули мышкой по боевой карте 
+        {
+            // Debug.Log("0");
+            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 1));
+            RaycastHit _hit;
+            if (Physics.Raycast(ray, out _hit, Mathf.Infinity))
+            {
+                //Debug.Log("1"); 
+                for (int k = 0; k < _FightCardOnTable.Length; k++) // перебираем, попали ли по карте (пока у нас нет больше коллайдеров, так что только по ним) и по какой 
+                {
+                    if (_hit.transform.name == _FightCardOnTable[k].name) // && _boolSwitch == true) // выяснили имя карты, по которой попали 
+                    {
+                        //_boolSwitch = false;
+                        // Debug.Log(_FightCardOnTable[k].name);
+                        FightCard(k); // вызываем обработку 
+                    }
+                }
+            }
+        }
+
+        //if (Input.GetMouseButtonUp(0)) _helper = true; // как только мышь отпустили, хелпер в True
+    }
+
+    void FightCard(int k) // запоминаем параметры выбранной боевой карты для расчёта 
     {
         myItemListCard = jSONControllerCard.myListFightCard; // вытягиваем лист со скрипта 
         for (int j = 0; j < myItemListCard.fight_card.Length; j++) // пробежались по всем картам из JSON-файла 
         {
-            if (_FightCardInScene[k].name == myItemListCard.fight_card[j].id) // нашли совпадения с картой из JSON
+            if (_FightCardOnTable[k].name == myItemListCard.fight_card[j].id) // нашли совпадения с картой из JSON
             {
                 Debug.Log("3");
-                _helper = false;
+                _helper = false; // хелпер в 0, чтобы не обрабатывать в Update рэйкаст, пока мышь нажата
                 //counter_card = j; // запомнили, в какой ячейке массива карт нужная карта 
                 _costCard = myItemListCard.fight_card[j].cost;
                 _materialsCard = myItemListCard.fight_card[j].materials;
@@ -176,55 +251,34 @@ public class FightRules : MonoBehaviour
                 _foodCard = myItemListCard.fight_card[j].food;
                 _attackCard = myItemListCard.fight_card[j].attack;
                 _protectCard = myItemListCard.fight_card[j].protect;
-                _diplomationCard = myItemListCard.fight_card[j].diplomation; 
+                _diplomationCard = myItemListCard.fight_card[j].diplomation;
                 _fortuneCard = myItemListCard.fight_card[j].fortune;
 
-                AnimationCard(_FightCardInScene[k]);
+                AnimationCard(_FightCardOnTable[k]);
             }
         }
     }
 
-    void Update()
+    void AnimationCard(Transform y) // анимация боевой карты, пока топорная (изменение масштаба)
     {
-        if (Input.GetMouseButtonDown(0) && _helper == true)
-        {
-            Debug.Log("0");
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 1));
-            RaycastHit _hit;
-            if (Physics.Raycast(ray, out _hit, Mathf.Infinity))
-            {
-                Debug.Log("1");
-                for (int k = 0; k < _FightCardInScene.Length; k++)
-                {
-                    if (_hit.transform.name == _FightCardInScene[k].name)
-                    {
-                        Debug.Log("2");
-                        FightCard(k);
-                    }
-                }
-            }
-        }
-
-        if (Input.GetMouseButtonUp(0)) _helper = true;
-    }
-
-    void AnimationCard(Transform y)
-    {
-        Debug.Log("4");
-        y.transform.localScale = new Vector3(80f, 80f, 80f);
-        StartCoroutine(waiter(y));
+        Debug.Log("Anim");
+        Vector3 _mainlocalCard = y.transform.localScale; 
+        y.transform.localScale = new Vector3(y.transform.localScale.x*1.25f, y.transform.localScale.y * 1.25f, y.transform.localScale.z * 1.25f); // увеличиваем карту в 1,25 раза     
+        StartCoroutine(waiter(y.gameObject, _mainlocalCard)); // ждём 
         Debug.Log("5"); 
-    }
+    } 
 
-    IEnumerator waiter(Transform y)
+    IEnumerator waiter(GameObject y, Vector3 _mainlocalCard) // пауза для анимации 
     {
         Debug.Log("6");
-        yield return new WaitForSeconds(1);
-        y.transform.localScale = new Vector3(65f, 65f, 65f);
+        yield return new WaitForSeconds(1); // ждём 1 секунду
+        y.transform.localScale = _mainlocalCard; // сбрасываем масштаб
+        _helper = true;
+        //_boolSwitch = true;
         CalcFight(); 
     }
 
-    void CalcFight()
+    void CalcFight() // Расчёт очков в бою 
     { 
         if (_attackCard == 1)
         {
