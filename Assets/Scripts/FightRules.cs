@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class FightRules : MonoBehaviour
 {
@@ -12,9 +13,11 @@ public class FightRules : MonoBehaviour
 
     int[] MoralePresident = new int[3];
     int[] MoralePresidentEnemy = new int[3];
-    int _totalMoralePresident = 0;
-    int _totalMoralePresidentEnemy = 0; 
+    public int _totalMoralePresident = 0;
+    public int _totalMoralePresidentEnemy = 0; 
     public Canvas _canvasCamera;
+    public Camera _camera;
+
     public Transform[] _Presidents_before;
     public Transform[] _PresidentsEnemy_before;
     public Transform[] _Place_after; 
@@ -49,8 +52,8 @@ public class FightRules : MonoBehaviour
     private Transform[] _FightCardPlace;
     public GameObject Folder_FightCardPlace;
     public GameObject Folder_FightCardInScene;
-    // private int counter_card = 0; // передаём номер карты из массива карт (j в цикле) 
-    public int _costCard = 0;
+    private int counter_card = 0; // передаём номер карты из массива карт (j в цикле) 
+    private int _costCard = 0;
     private int _materialsCard = 0;
     private int _economicCard = 0;
     private int _healthCard = 0;
@@ -59,9 +62,24 @@ public class FightRules : MonoBehaviour
     private int _protectCard = 0;
     private int _diplomationCard = 0;
     private int _fortuneCard = 0;
+    private int _deltamorale_positive = 0;
+    private int _deltamorale_negative = 0; 
 
-    private bool _helper=true;
-    private bool _boolSwitch = true;
+    private bool _helper = true;
+    private bool _helper2 = false;
+    private bool _helper3 = true;
+    private bool _helper4 = true;
+    private Vector3 _offset;
+    private float mzCoord;
+
+    private Transform _dragFactor=null;
+    public Canvas _canvasForDragFactorText;
+
+    private int _materials_ability_protect = 0;
+    private int _economic_ability_protect = 0;
+    private int _economic_ability_attack = 0;
+    private int _health_ability_protect = 0;
+    private int _food_ability_protect = 0; 
 
     //Transform _rootGO;
     //private Transform _son; // сын 
@@ -82,8 +100,7 @@ public class FightRules : MonoBehaviour
         _FightCardPlace = new Transform[Folder_FightCardPlace.transform.childCount];
         _FightCardOnTable = new Transform[_FightCardPlace.Length];
 
-
-        int[] _random = new int[_FightCardPlace.Length]; // формируем упорядоченный массив с 0 до _FightCardPlace.Length (до 9 включительно)
+        int[] _random = new int[_FightCardPlace.Length]; // формируем упорядоченный массив с 0 до _FightCardPlace.Length (от 0 до 9 включительно)
         for (int i = 0; i < _random.Length; i++) { _random[i] =i; }
 
         int[] Mix(int[] num) // перемешиваем его 
@@ -98,19 +115,24 @@ public class FightRules : MonoBehaviour
             return num;
         }
 
-        int[] MixArray = Mix(_random); // перемешанный массив для выбора случайных карт
+        int[] MixArray = Mix(_random); // перемешанный массив для выбора случайных карт из _FightCardInScene
 
+        myItemListCard = jSONControllerCard.myListFightCard; // вытягиваем лист со скрипта jSON 
         for (int i = 0; i < _FightCardPlace.Length; i++) // пробежались по всем Place будущих карт 
         {
             _FightCardPlace[i] = Folder_FightCardPlace.transform.GetChild(i).transform; // занесли их в массив _FightCardPlace[] 
             _FightCardOnTable[i] = _FightCardInScene[MixArray[i]]; // заполнили массив случайными картами
-                //_FightCardOnTable[i] = Instantiate(_FightCardInScene[_random], Vector3.zero, Quaternion.identity); // скопировали рандомный префаб из массива _FightCardInScene в массив OnTable. Возможны повторения карт 
-                //_FightCardOnTable[i].name = _FightCardInScene[_random].name; // задаём такое же имя, как у оригинала (без приставки Clone) 
             _FightCardOnTable[i].transform.SetParent(_FightCardPlace[i]); // поместили боевые карты в Place[] 
             _FightCardOnTable[i].transform.localPosition = Vector3.zero; // сбросили позицию
             _FightCardOnTable[i].transform.localRotation = Quaternion.identity; // сбросили вращение 
-
-                //Debug.Log("_FightCardOnTable[" + i + "] = " + _FightCardOnTable[i]);
+            
+            for (int j = 0; j < myItemListCard.fight_card.Length; j++) // пробежались по всем картам из JSON-файла 
+            {
+                if (_FightCardOnTable[i].name == myItemListCard.fight_card[j].id) // нашли совпадения с картой из JSON
+                {
+                    _FightCardOnTable[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentInChildren<Text>().text = "" + myItemListCard.fight_card[j].cost; // прописали цену для каждой карты за столом 
+                }
+            }
         }
     }
 
@@ -130,6 +152,11 @@ public class FightRules : MonoBehaviour
             _ourBUFFhealth += _FactorItemPresident[i]._BUFFhealth;
             _ourBUFFfood += _FactorItemPresident[i]._BUFFfood;
             _ourBUFFeconomic += _FactorItemPresident[i]._BUFFeconomic;
+            _materials_ability_protect += _FactorItemPresident[i]._materials_ability_protect; 
+            _economic_ability_protect += _FactorItemPresident[i]._economic_ability_protect; 
+            _economic_ability_attack += _FactorItemPresident[i]._economic_ability_attack; 
+            _health_ability_protect += _FactorItemPresident[i]._health_ability_protect; 
+            _food_ability_protect += _FactorItemPresident[i]._food_ability_protect; 
         }
 
         for (int i = 0; i < _PresidentsEnemy_before.Length; i++)
@@ -149,6 +176,7 @@ public class FightRules : MonoBehaviour
         }
 
         ReadyFight();
+        ReadyFight2(); 
         calcLocationFactorsOur();
         calcLocationFactorsEnemy(); 
     }
@@ -207,33 +235,58 @@ public class FightRules : MonoBehaviour
         _PlaceFactorEnemy[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFhealth; // хп здравоохранения 
     }
 
-
-
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && _helper == true) // если щелкнули мышкой по боевой карте 
+        if (Input.GetMouseButtonDown(0) && _helper) // если щелкнули мышкой по боевой карте 
         {
-            // Debug.Log("0");
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 1));
             RaycastHit _hit;
             if (Physics.Raycast(ray, out _hit, Mathf.Infinity))
             {
-                //Debug.Log("1"); 
                 for (int k = 0; k < _FightCardOnTable.Length; k++) // перебираем, попали ли по карте (пока у нас нет больше коллайдеров, так что только по ним) и по какой 
                 {
-                    if (_hit.transform.name == _FightCardOnTable[k].name) // && _boolSwitch == true) // выяснили имя карты, по которой попали 
+                    if (_hit.transform.name == _FightCardOnTable[k].name) // выяснили имя карты, по которой попали 
                     {
-                        //_boolSwitch = false;
-                        // Debug.Log(_FightCardOnTable[k].name);
+                        counter_card = k;
+
+                        //AnimationCard(_FightCardOnTable[counter_card]);
+                        _helper = false; // хелпер в 0, чтобы не обрабатывать в Update рэйкаст, пока мышь нажата
+                        _helper2 = true;
                         FightCard(k); // вызываем обработку 
+                        mzCoord = _camera.WorldToScreenPoint(_FightCardOnTable[counter_card].position).z;
+                        _offset = _FightCardOnTable[counter_card].position - GetMouseWorldPos();
                     }
                 }
+            } 
+        }
+
+        if (Input.GetMouseButton(0) && _helper2) 
+        {
+            AnimationCard(_FightCardOnTable[counter_card]);
+        }
+        
+        if (Input.GetMouseButtonUp(0) == true)
+        {
+            _helper = true;
+            _helper3 = true;
+            _helper2 = false;
+            _helper4 = true;
+
+            ResetAnimationCard(_FightCardOnTable[counter_card]);
+            if (_dragFactor != null)
+            { 
+                CalcFight();
             }
         }
 
-        //if (Input.GetMouseButtonUp(0)) _helper = true; // как только мышь отпустили, хелпер в True
     }
 
+    private Vector3 GetMouseWorldPos()
+    {
+        Vector3 mousePoint = Input.mousePosition;
+        mousePoint.z = mzCoord;
+        return _camera.ScreenToWorldPoint(mousePoint);
+    }
     void FightCard(int k) // запоминаем параметры выбранной боевой карты для расчёта 
     {
         myItemListCard = jSONControllerCard.myListFightCard; // вытягиваем лист со скрипта 
@@ -241,9 +294,6 @@ public class FightRules : MonoBehaviour
         {
             if (_FightCardOnTable[k].name == myItemListCard.fight_card[j].id) // нашли совпадения с картой из JSON
             {
-                Debug.Log("3");
-                _helper = false; // хелпер в 0, чтобы не обрабатывать в Update рэйкаст, пока мышь нажата
-                //counter_card = j; // запомнили, в какой ячейке массива карт нужная карта 
                 _costCard = myItemListCard.fight_card[j].cost;
                 _materialsCard = myItemListCard.fight_card[j].materials;
                 _economicCard = myItemListCard.fight_card[j].economic;
@@ -253,55 +303,147 @@ public class FightRules : MonoBehaviour
                 _protectCard = myItemListCard.fight_card[j].protect;
                 _diplomationCard = myItemListCard.fight_card[j].diplomation;
                 _fortuneCard = myItemListCard.fight_card[j].fortune;
-
-                AnimationCard(_FightCardOnTable[k]);
+                _deltamorale_positive = myItemListCard.fight_card[j].deltamorale_positive;
+                _deltamorale_negative = myItemListCard.fight_card[j].deltamorale_negative; 
             }
         }
     }
 
-    void AnimationCard(Transform y) // анимация боевой карты, пока топорная (изменение масштаба)
+    void AnimationCard(Transform _y) // анимация боевой карты, пока топорная (изменение масштаба)
     {
-        Debug.Log("Anim");
-        Vector3 _mainlocalCard = y.transform.localScale; 
-        y.transform.localScale = new Vector3(y.transform.localScale.x*1.25f, y.transform.localScale.y * 1.25f, y.transform.localScale.z * 1.25f); // увеличиваем карту в 1,25 раза     
-        StartCoroutine(waiter(y.gameObject, _mainlocalCard)); // ждём 
-        Debug.Log("5"); 
-    } 
+        if (_helper3) // выполняем один раз
+        {
+            _helper3 = false;
+            _y.transform.localScale = new Vector3(_y.transform.localScale.x * 1.25f, _y.transform.localScale.y * 1.25f, _y.transform.localScale.z * 1.25f); // увеличиваем карту в 1,25 раза     
+        }
 
-    IEnumerator waiter(GameObject y, Vector3 _mainlocalCard) // пауза для анимации 
+        _y.transform.position = GetMouseWorldPos() + _offset;
+
+        if (_helper4 == true)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 1));
+            RaycastHit _hit;
+            if (Physics.Raycast(ray, out _hit, Mathf.Infinity, 3)) // 3 - маска MaskRaycast, чтобы не видеть карты 
+            {
+                for (int k = 0; k < _PlaceFactor.Length; k++) // перебираем, попали ли по фактору и по какому 
+                {
+                    if (_hit.transform.name == _PlaceFactor[k].name)
+                    {
+                        _dragFactor = _hit.transform; // запомнили объект фактора 
+                        _canvasForDragFactorText.transform.GetComponentInChildren<Text>().text = "" + _dragFactor.name; // написали 
+                    }
+                }
+            }
+            else
+            {
+                _dragFactor = null;
+                _canvasForDragFactorText.transform.GetComponentInChildren<Text>().text = "";
+            }
+        }
+    }
+
+    void ResetAnimationCard(Transform y)
     {
-        Debug.Log("6");
-        yield return new WaitForSeconds(1); // ждём 1 секунду
-        y.transform.localScale = _mainlocalCard; // сбрасываем масштаб
-        _helper = true;
-        //_boolSwitch = true;
-        CalcFight(); 
+        y.transform.localScale = Vector3.one; // сбрасываем масштаб
+        y.transform.localPosition = Vector3.zero; // сбросили позицию 
+        _canvasForDragFactorText.transform.GetComponentInChildren<Text>().text = ""; 
     }
 
     void CalcFight() // Расчёт очков в бою 
-    { 
-        if (_attackCard == 1)
+    {
+        if (_dragFactor != null)
         {
-            if (_materialsCard == 1) _enemyBUFFmaterial -= _costCard;
-            if (_economicCard == 1) _enemyBUFFeconomic -= _costCard;
-            if (_healthCard == 1) _enemyBUFFhealth -= _costCard;
-            if (_foodCard == 1) _enemyBUFFfood -= _costCard;
+
+            /*
+            _materials_ability_protect
+            _economic_ability_protect
+            _economic_ability_attack
+            _health_ability_protect
+            _food_ability_protect
+            
+            _ourBUFFeconomic = 0;
+            _ourBUFFfood = 0;
+            _ourBUFFhealth = 0;
+            _ourBUFFmaterial = 0;
+
+            _enemyBUFFeconomic = 0;
+            _enemyBUFFfood = 0;
+            _enemyBUFFhealth = 0;
+            _enemyBUFFmaterial = 0; 
+
+            */ 
+
+            if (_attackCard == 1)
+            {
+                if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
+                    (_economicCard == 1 && _dragFactor.name == "Economic") ||
+                    (_healthCard == 1 && _dragFactor.name == "Health") ||
+                    (_foodCard == 1 && _dragFactor.name == "Food"))
+                {
+                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _deltamorale_positive; // - _costCard;
+                    _totalMoralePresident = _totalMoralePresident - _costCard; 
+
+                    Debug.Log("_totalMoralePresidentEnemy " + _totalMoralePresidentEnemy);
+                    Debug.Log("_deltamorale_positive " + _deltamorale_positive);
+                }
+            }
+
+            if (_protectCard == 1)
+            {
+                if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
+                    (_economicCard == 1 && _dragFactor.name == "Economic") ||
+                    (_healthCard == 1 && _dragFactor.name == "Health") ||
+                    (_foodCard == 1 && _dragFactor.name == "Food"))
+                {
+                    _totalMoralePresident = _totalMoralePresident - _deltamorale_negative - _costCard;
+                }
+            }
+
+            if (_diplomationCard == 1)
+            {
+                if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
+                    (_economicCard == 1 && _dragFactor.name == "Economic") ||
+                    (_healthCard == 1 && _dragFactor.name == "Health") ||
+                    (_foodCard == 1 && _dragFactor.name == "Food"))
+                {
+                    //
+                }
+            }
+
+            if (_fortuneCard == 1)
+            {
+                if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
+                    (_economicCard == 1 && _dragFactor.name == "Economic") ||
+                    (_healthCard == 1 && _dragFactor.name == "Health") ||
+                    (_foodCard == 1 && _dragFactor.name == "Food"))
+                {
+                    int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
+                    _totalMoralePresident = _totalMoralePresident - _randomDeltaMorale[Random.Range(0, 1)] - _costCard;
+                }
+            }
         }
 
-        if (_protectCard == 1)
+        ReadyFight2();
+        
+        if (_totalMoralePresidentEnemy <= 0)
         {
-            if (_materialsCard == 1) _ourBUFFmaterial += _costCard;
-            if (_economicCard == 1) _ourBUFFeconomic += _costCard;
-            if (_healthCard == 1) _ourBUFFhealth += _costCard;
-            if (_foodCard == 1) _ourBUFFfood += _costCard;
+            DataHolder._winnerHolder = true;
+            DataHolder._moralePresidentHolder = _totalMoralePresident;
+            SceneManager.LoadScene(3);
         }
-        calcLocationFactorsOur();
-        calcLocationFactorsEnemy();
-        ReadyFight(); 
+        else
+            if (_totalMoralePresident <= 0)
+        {
+            DataHolder._winnerHolder = false;
+            SceneManager.LoadScene(3);
+        }
     }
 
     public void ReadyFight() // рассчитывается при нажатии кнопки "Ready" 
     {
+        calcLocationFactorsOur();
+        calcLocationFactorsEnemy(); 
+
         for (int i = 0; i < 3; i++) // считаем мораль 
         {
             MoralePresident[i] = _FactorItemPresident[i]._BUFFmaterials + _FactorItemPresident[i]._BUFFeconomic + _FactorItemPresident[i]._BUFFhealth + _FactorItemPresident[i]._BUFFfood;
@@ -309,7 +451,10 @@ public class FightRules : MonoBehaviour
             MoralePresidentEnemy[i] = _FactorItemPresidentEnemy[i]._BUFFmaterials + _FactorItemPresidentEnemy[i]._BUFFeconomic + _FactorItemPresidentEnemy[i]._BUFFhealth + _FactorItemPresidentEnemy[i]._BUFFfood;
             _totalMoralePresidentEnemy += MoralePresidentEnemy[i];
         }
+    }
 
+    public void ReadyFight2() // рассчитывается при нажатии кнопки "Ready" 
+    {
         _canvasCamera.transform.Find("Text_TotalMorale").GetComponent<Text>().text = "You morale " + _totalMoralePresident;
         _canvasCamera.transform.Find("Text_TotalMoraleEnemy").GetComponent<Text>().text = "Enemy morale " + _totalMoralePresidentEnemy;
     } 

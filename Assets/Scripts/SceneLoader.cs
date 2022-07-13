@@ -21,4 +21,9 @@ public class SceneLoader : MonoBehaviour
     {
         SceneManager.LoadScene(number);
     }
+
+    public void Quit()
+    {
+        Application.Quit();
+    }
 }

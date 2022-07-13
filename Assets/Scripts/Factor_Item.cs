@@ -261,6 +261,7 @@ public class Factor_Item : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         _food_ability_attack = myItemList.player[j].food_ability_attack; ///////////////////
     }
 
+
     void Reset()
     {
         _mainHeader = "";
@@ -279,14 +280,14 @@ public class Factor_Item : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         // передаём в компоненты текста нужные значения переменных. Можно было использовать тот же массив texts[].text, но, изменив порядок текстовых блоков, можно получить другие сообщения 
         _parent.transform.Find("Text_Factor").GetComponent<Text>().text = _mainHeader;
         _parent.transform.Find("Text_Abilities").GetComponent<Text>().text = _descriptionFactor; //задали в текстовом описание Abilities 
-        _parent.transform.Find("Text_MaterialProtect").GetComponent<Text>().text = "" + _materials_ability_protect;
-        _parent.transform.Find("Text_EconomicProtect").GetComponent<Text>().text = "" + _economic_ability_protect;
-        _parent.transform.Find("Text_EconomicAttack").GetComponent<Text>().text = "" + _economic_ability_attack;
-        _parent.transform.Find("Text_HealthProtect").GetComponent<Text>().text = "" + _health_ability_protect;
-        _parent.transform.Find("Text_FoodProtect").GetComponent<Text>().text = "" + _food_ability_protect;
+        //_parent.transform.Find("Text_MaterialProtect").GetComponent<Text>().text = "" + _materials_ability_protect;
+        //_parent.transform.Find("Text_EconomicProtect").GetComponent<Text>().text = "" + _economic_ability_protect;
+        //_parent.transform.Find("Text_EconomicAttack").GetComponent<Text>().text = "" + _economic_ability_attack;
+        //_parent.transform.Find("Text_HealthProtect").GetComponent<Text>().text = "" + _health_ability_protect;
+        //_parent.transform.Find("Text_FoodProtect").GetComponent<Text>().text = "" + _food_ability_protect;
         this.transform.Find("Text_Level").GetComponent<Text>().text = "" + _level;
-        this.transform.Find("Text_Climate").GetComponent<Text>().text = "" + _climate;
-        this.transform.Find("Text_NamePresident").GetComponent<Text>().text = "" + _name;
+        //this.transform.Find("Text_Climate").GetComponent<Text>().text = "" + _climate;
+        //this.transform.Find("Text_NamePresident").GetComponent<Text>().text = "" + _name;
         this.transform.Find("Text_BufDiplomation").GetComponent<Text>().text = "" + _buff_diplomation;
         this.transform.Find("Text_BufFortune").GetComponent<Text>().text = "" + _buff_fortune;
         this.transform.Find("Text_BufProtection").GetComponent<Text>().text = "" + _buff_protection;

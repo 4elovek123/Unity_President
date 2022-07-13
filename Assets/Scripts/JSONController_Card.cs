@@ -21,6 +21,8 @@ public class JSONController_Card : MonoBehaviour
         public int protect;
         public int diplomation;
         public int fortune;
+        public int deltamorale_positive;
+        public int deltamorale_negative; 
     }
 
     [System.Serializable]
