@@ -275,7 +275,8 @@ public class FightRules : MonoBehaviour
             ResetAnimationCard(_FightCardOnTable[counter_card]);
             if (_dragFactor != null)
             { 
-                CalcFight();
+                CalcOurFight();
+
             }
         }
 
@@ -304,9 +305,11 @@ public class FightRules : MonoBehaviour
                 _diplomationCard = myItemListCard.fight_card[j].diplomation;
                 _fortuneCard = myItemListCard.fight_card[j].fortune;
                 _deltamorale_positive = myItemListCard.fight_card[j].deltamorale_positive;
-                _deltamorale_negative = myItemListCard.fight_card[j].deltamorale_negative; 
+                _deltamorale_negative = myItemListCard.fight_card[j].deltamorale_negative;
+                Debug.Log("Карта " + _FightCardOnTable[k].name);
             }
         }
+
     }
 
     void AnimationCard(Transform _y) // анимация боевой карты, пока топорная (изменение масштаба)
@@ -349,7 +352,7 @@ public class FightRules : MonoBehaviour
         _canvasForDragFactorText.transform.GetComponentInChildren<Text>().text = ""; 
     }
 
-    void CalcFight() // Расчёт очков в бою 
+    void CalcOurFight() // Расчёт очков в бою 
     {
         if (_dragFactor != null)
         {
@@ -371,7 +374,7 @@ public class FightRules : MonoBehaviour
             _enemyBUFFhealth = 0;
             _enemyBUFFmaterial = 0; 
 
-            */ 
+            */
 
             if (_attackCard == 1)
             {
@@ -380,12 +383,14 @@ public class FightRules : MonoBehaviour
                     (_healthCard == 1 && _dragFactor.name == "Health") ||
                     (_foodCard == 1 && _dragFactor.name == "Food"))
                 {
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _deltamorale_positive; // - _costCard;
-                    _totalMoralePresident = _totalMoralePresident - _costCard; 
+                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _deltamorale_positive; 
+                    _totalMoralePresident = _totalMoralePresident - _costCard;
 
-                    Debug.Log("_totalMoralePresidentEnemy " + _totalMoralePresidentEnemy);
-                    Debug.Log("_deltamorale_positive " + _deltamorale_positive);
+                    //Debug.Log("_totalMoralePresidentEnemy " + _totalMoralePresidentEnemy);
+                    //Debug.Log("_deltamorale_positive " + _deltamorale_positive);
                 }
+                else _totalMoralePresident = _totalMoralePresident - _costCard;
+
             }
 
             if (_protectCard == 1)
@@ -398,6 +403,7 @@ public class FightRules : MonoBehaviour
                     _totalMoralePresident = _totalMoralePresident - _deltamorale_negative - _costCard;
                 }
             }
+            else _totalMoralePresident = _totalMoralePresident - _costCard;
 
             if (_diplomationCard == 1)
             {
@@ -406,9 +412,11 @@ public class FightRules : MonoBehaviour
                     (_healthCard == 1 && _dragFactor.name == "Health") ||
                     (_foodCard == 1 && _dragFactor.name == "Food"))
                 {
-                    //
+                    _totalMoralePresident = _totalMoralePresident - _costCard;
+                    //Debug.Log("_diplomationCard"); 
                 }
             }
+            else _totalMoralePresident = _totalMoralePresident - _costCard;
 
             if (_fortuneCard == 1)
             {
@@ -421,23 +429,74 @@ public class FightRules : MonoBehaviour
                     _totalMoralePresident = _totalMoralePresident - _randomDeltaMorale[Random.Range(0, 1)] - _costCard;
                 }
             }
+            else _totalMoralePresident = _totalMoralePresident - _costCard;
         }
 
         ReadyFight2();
-        
-        if (_totalMoralePresidentEnemy <= 0)
-        {
-            DataHolder._winnerHolder = true;
-            DataHolder._moralePresidentHolder = _totalMoralePresident;
-            SceneManager.LoadScene(3);
-        }
-        else
-            if (_totalMoralePresident <= 0)
-        {
-            DataHolder._winnerHolder = false;
-            SceneManager.LoadScene(3);
-        }
+        StartCoroutine(PauseOurCoroutine()); // пауза 
     }
+
+    IEnumerator PauseOurCoroutine()
+    {
+        Cursor.lockState = CursorLockMode.Locked; // отключаем курсор 
+        yield return new WaitForSeconds(2);
+        CalcEnemyFight();
+    }
+
+    void CalcEnemyFight() // Расчёт очков в бою 
+    {
+        int _enemy = Random.Range(0, _FightCardOnTable.Length - 1); // выбираем карту (за столом) наугад 
+        FightCard(_enemy); // получаем её данные 
+        _canvasForDragFactorText.transform.GetComponentInChildren<Text>().text = "Противник применил карту " + _FightCardOnTable[_enemy].name; // написали 
+        StartCoroutine(PauseEnemyCoroutine()); // пауза 
+    }
+    IEnumerator PauseEnemyCoroutine()
+    {
+        yield return new WaitForSeconds(2);
+        CalcEnemyFight2();
+    }
+
+    void CalcEnemyFight2()
+    {
+            if (_attackCard == 1)
+            {
+                if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
+                {
+                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
+                    _totalMoralePresident = _totalMoralePresident - _deltamorale_positive;
+                }
+            }
+
+            if (_protectCard == 1)
+            {
+                if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
+                {
+                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _deltamorale_negative - _costCard;
+                }
+            }
+
+            if (_diplomationCard == 1)
+            {
+                if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
+                {
+                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
+                }
+            }
+
+            if (_fortuneCard == 1)
+            {
+                if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
+                {
+                    int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
+                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _randomDeltaMorale[Random.Range(0, 1)] - _costCard;
+                }
+            }
+
+        ReadyFight2();
+        Cursor.lockState = CursorLockMode.None; // включаем курсор 
+        _canvasForDragFactorText.transform.GetComponentInChildren<Text>().text = "";
+    } 
+
 
     public void ReadyFight() // рассчитывается при нажатии кнопки "Ready" 
     {
@@ -457,5 +516,21 @@ public class FightRules : MonoBehaviour
     {
         _canvasCamera.transform.Find("Text_TotalMorale").GetComponent<Text>().text = "You morale " + _totalMoralePresident;
         _canvasCamera.transform.Find("Text_TotalMoraleEnemy").GetComponent<Text>().text = "Enemy morale " + _totalMoralePresidentEnemy;
+        Debug.Log("TotalMoraleEnemy " + _totalMoralePresidentEnemy);
+        Debug.Log("TotalMorale " + _totalMoralePresident);
+        Debug.Log("   ");
+
+        if (_totalMoralePresidentEnemy <= 0)
+        {
+            DataHolder._winnerHolder = true;
+            DataHolder._moralePresidentHolder = _totalMoralePresident;
+            SceneManager.LoadScene(3);
+        }
+        else
+    if (_totalMoralePresident <= 0)
+        {
+            DataHolder._winnerHolder = false;
+            SceneManager.LoadScene(3);
+        }
     } 
 } 

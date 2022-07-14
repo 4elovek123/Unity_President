@@ -87,7 +87,7 @@
 			"diplomation":0, 
 			"fortune": 1, 
 			"deltamorale_positive": 10, 
-			"deltamorale_negative": 5
+			"deltamorale_negative": -5
 		}, 
 
 		{
@@ -117,7 +117,7 @@
 			"diplomation":0, 
 			"fortune": 1, 
 			"deltamorale_positive": 10, 
-			"deltamorale_negative": 5 
+			"deltamorale_negative": -5 
 		}, 
 
 		{
