@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 public class FightRules : MonoBehaviour
 {
@@ -79,7 +80,14 @@ public class FightRules : MonoBehaviour
     private int _economic_ability_protect = 0;
     private int _economic_ability_attack = 0;
     private int _health_ability_protect = 0;
-    private int _food_ability_protect = 0; 
+    private int _food_ability_protect = 0;
+
+    [TextArea]
+    private string _testText; // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
+    public Transform _scrollViewContent; // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
+
+
+
 
     //Transform _rootGO;
     //private Transform _son; // сын 
@@ -178,7 +186,7 @@ public class FightRules : MonoBehaviour
         ReadyFight();
         ReadyFight2(); 
         calcLocationFactorsOur();
-        calcLocationFactorsEnemy(); 
+        calcLocationFactorsEnemy();
     }
 
     void calcLocationFactorsOur() // расставляем наши факторы, пока топорно без зависимости от выбора президента
@@ -254,7 +262,9 @@ public class FightRules : MonoBehaviour
                         _helper2 = true;
                         FightCard(k); // вызываем обработку 
                         mzCoord = _camera.WorldToScreenPoint(_FightCardOnTable[counter_card].position).z;
-                        _offset = _FightCardOnTable[counter_card].position - GetMouseWorldPos();
+                        _offset = _FightCardOnTable[counter_card].position - GetMouseWorldPos(); 
+
+
                     }
                 }
             } 
@@ -272,13 +282,14 @@ public class FightRules : MonoBehaviour
             _helper2 = false;
             _helper4 = true;
 
-            ResetAnimationCard(_FightCardOnTable[counter_card]);
+            if (_FightCardOnTable[counter_card] != null) ResetAnimationCard(_FightCardOnTable[counter_card]);
             if (_dragFactor != null)
             { 
                 CalcOurFight();
-
+                _dragFactor = null;
             }
         }
+        _scrollViewContent.transform.GetComponent<Text>().text = _testText;
 
     }
 
@@ -306,7 +317,7 @@ public class FightRules : MonoBehaviour
                 _fortuneCard = myItemListCard.fight_card[j].fortune;
                 _deltamorale_positive = myItemListCard.fight_card[j].deltamorale_positive;
                 _deltamorale_negative = myItemListCard.fight_card[j].deltamorale_negative;
-                Debug.Log("Карта " + _FightCardOnTable[k].name);
+                // Debug.Log("Карта " + _FightCardOnTable[k].name);
             }
         }
 
@@ -356,7 +367,7 @@ public class FightRules : MonoBehaviour
     {
         if (_dragFactor != null)
         {
-
+            _testText = " We used the card " + _FightCardOnTable[counter_card].name + " to " + _dragFactor.name + "\n" + _testText;
             /*
             _materials_ability_protect
             _economic_ability_protect
@@ -375,7 +386,6 @@ public class FightRules : MonoBehaviour
             _enemyBUFFmaterial = 0; 
 
             */
-
             if (_attackCard == 1)
             {
                 if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
@@ -383,53 +393,55 @@ public class FightRules : MonoBehaviour
                     (_healthCard == 1 && _dragFactor.name == "Health") ||
                     (_foodCard == 1 && _dragFactor.name == "Food"))
                 {
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _deltamorale_positive; 
+                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _deltamorale_positive;
                     _totalMoralePresident = _totalMoralePresident - _costCard;
-
-                    //Debug.Log("_totalMoralePresidentEnemy " + _totalMoralePresidentEnemy);
-                    //Debug.Log("_deltamorale_positive " + _deltamorale_positive);
                 }
                 else _totalMoralePresident = _totalMoralePresident - _costCard;
-
             }
-
-            if (_protectCard == 1)
-            {
-                if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
-                    (_economicCard == 1 && _dragFactor.name == "Economic") ||
-                    (_healthCard == 1 && _dragFactor.name == "Health") ||
-                    (_foodCard == 1 && _dragFactor.name == "Food"))
+            else 
                 {
-                    _totalMoralePresident = _totalMoralePresident - _deltamorale_negative - _costCard;
-                }
-            }
-            else _totalMoralePresident = _totalMoralePresident - _costCard;
-
-            if (_diplomationCard == 1)
-            {
-                if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
-                    (_economicCard == 1 && _dragFactor.name == "Economic") ||
-                    (_healthCard == 1 && _dragFactor.name == "Health") ||
-                    (_foodCard == 1 && _dragFactor.name == "Food"))
+                if (_protectCard == 1)
                 {
-                    _totalMoralePresident = _totalMoralePresident - _costCard;
-                    //Debug.Log("_diplomationCard"); 
+                    if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
+                        (_economicCard == 1 && _dragFactor.name == "Economic") ||
+                        (_healthCard == 1 && _dragFactor.name == "Health") ||
+                        (_foodCard == 1 && _dragFactor.name == "Food"))
+                    {
+                        _totalMoralePresident = _totalMoralePresident - _deltamorale_negative - _costCard;
+                    }
+                    else _totalMoralePresident = _totalMoralePresident - _costCard;
                 }
-            }
-            else _totalMoralePresident = _totalMoralePresident - _costCard;
-
-            if (_fortuneCard == 1)
-            {
-                if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
-                    (_economicCard == 1 && _dragFactor.name == "Economic") ||
-                    (_healthCard == 1 && _dragFactor.name == "Health") ||
-                    (_foodCard == 1 && _dragFactor.name == "Food"))
+                else 
                 {
-                    int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                    _totalMoralePresident = _totalMoralePresident - _randomDeltaMorale[Random.Range(0, 1)] - _costCard;
-                }
+                    if (_diplomationCard == 1)
+                    {
+                        if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
+                            (_economicCard == 1 && _dragFactor.name == "Economic") ||
+                            (_healthCard == 1 && _dragFactor.name == "Health") ||
+                            (_foodCard == 1 && _dragFactor.name == "Food"))
+                        {
+                            _totalMoralePresident = _totalMoralePresident - _costCard;
+                        }
+                        else _totalMoralePresident = _totalMoralePresident - _costCard;
+                    }
+                    else
+                    {
+                        if (_fortuneCard == 1)
+                        {
+                            if ((_materialsCard == 1 && _dragFactor.name == "Materials") ||
+                                (_economicCard == 1 && _dragFactor.name == "Economic") ||
+                                (_healthCard == 1 && _dragFactor.name == "Health") ||
+                                (_foodCard == 1 && _dragFactor.name == "Food"))
+                            {
+                                int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
+                                _totalMoralePresident = _totalMoralePresident + _randomDeltaMorale[Random.Range(0, 1)] - _costCard; // если +10, то суммируем, если -5, то вычитаем 
+                            }
+                            else _totalMoralePresident = _totalMoralePresident - _costCard;
+                        }
+                        //else _totalMoralePresident = _totalMoralePresident - _costCard; 
+                    }
+                } 
             }
-            else _totalMoralePresident = _totalMoralePresident - _costCard;
         }
 
         ReadyFight2();
@@ -447,7 +459,22 @@ public class FightRules : MonoBehaviour
     {
         int _enemy = Random.Range(0, _FightCardOnTable.Length - 1); // выбираем карту (за столом) наугад 
         FightCard(_enemy); // получаем её данные 
-        _canvasForDragFactorText.transform.GetComponentInChildren<Text>().text = "Противник применил карту " + _FightCardOnTable[_enemy].name; // написали 
+        string _dragFactorEnemy = "";
+        if (_materialsCard == 1) _dragFactorEnemy = "Materials";
+        else
+        {
+            if (_economicCard == 1) _dragFactorEnemy = "Economic";
+            else
+            {
+                if (_healthCard == 1) _dragFactorEnemy = "Health";
+                else
+                {
+                    if (_foodCard == 1) _dragFactorEnemy = "Food";
+                }
+            }
+        }
+
+         _testText = " The opponent used the card: " + _FightCardOnTable[_enemy].name + " to " + _dragFactorEnemy + "\n" + _testText; 
         StartCoroutine(PauseEnemyCoroutine()); // пауза 
     }
     IEnumerator PauseEnemyCoroutine()
@@ -458,42 +485,54 @@ public class FightRules : MonoBehaviour
 
     void CalcEnemyFight2()
     {
-            if (_attackCard == 1)
+        if (_attackCard == 1)
             {
                 if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
                 {
                     _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
                     _totalMoralePresident = _totalMoralePresident - _deltamorale_positive;
                 }
+                else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard; 
             }
-
-            if (_protectCard == 1)
-            {
-                if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
+            else
+            { 
+                if (_protectCard == 1)
                 {
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _deltamorale_negative - _costCard;
+                    if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
+                    {
+                        _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _deltamorale_negative - _costCard;
+                    }
+                    else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
+                }
+                else 
+                { 
+
+                    if (_diplomationCard == 1)
+                    {
+                        if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
+                        {
+                            _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
+                        }
+                        else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
+                    } 
+                    else
+                    { 
+                        if (_fortuneCard == 1)
+                        {
+                            if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
+                            {
+                                int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
+                                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy + _randomDeltaMorale[Random.Range(0, 1)] - _costCard;
+                            }
+                            else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
+                        }
+                        // else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
+                    }
                 }
             }
+        
 
-            if (_diplomationCard == 1)
-            {
-                if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
-                {
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                }
-            }
-
-            if (_fortuneCard == 1)
-            {
-                if (_materialsCard == 1 ||_economicCard == 1 || _healthCard == 1 || _foodCard == 1 )
-                {
-                    int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _randomDeltaMorale[Random.Range(0, 1)] - _costCard;
-                }
-            }
-
-        ReadyFight2();
-        Cursor.lockState = CursorLockMode.None; // включаем курсор 
+        ReadyFight2(); 
         _canvasForDragFactorText.transform.GetComponentInChildren<Text>().text = "";
     } 
 
@@ -514,23 +553,58 @@ public class FightRules : MonoBehaviour
 
     public void ReadyFight2() // рассчитывается при нажатии кнопки "Ready" 
     {
+        Cursor.lockState = CursorLockMode.None; // включаем курсор 
         _canvasCamera.transform.Find("Text_TotalMorale").GetComponent<Text>().text = "You morale " + _totalMoralePresident;
         _canvasCamera.transform.Find("Text_TotalMoraleEnemy").GetComponent<Text>().text = "Enemy morale " + _totalMoralePresidentEnemy;
-        Debug.Log("TotalMoraleEnemy " + _totalMoralePresidentEnemy);
-        Debug.Log("TotalMorale " + _totalMoralePresident);
-        Debug.Log("   ");
+
+        _testText = "\n OurMorale " + _totalMoralePresident + "\n MoraleEnemy " + _totalMoralePresidentEnemy + "\n" + _testText; 
+
+        // Debug.Log("TotalMoraleEnemy " + _totalMoralePresidentEnemy);
+        // Debug.Log("TotalMorale " + _totalMoralePresident);
 
         if (_totalMoralePresidentEnemy <= 0)
         {
             DataHolder._winnerHolder = true;
             DataHolder._moralePresidentHolder = _totalMoralePresident;
             SceneManager.LoadScene(3);
+            SaveTXT(); 
         }
         else
-    if (_totalMoralePresident <= 0)
+            if (_totalMoralePresident <= 0)
+                {
+                    DataHolder._winnerHolder = false;
+                    SceneManager.LoadScene(3);
+                    SaveTXT();
+                }
+    }
+    void SaveTXT()
+    {
+        string path = Application.streamingAssetsPath + "/" + "log.txt";
+
+        //if (!File.Exists(path))
         {
-            DataHolder._winnerHolder = false;
-            SceneManager.LoadScene(3);
+            File.WriteAllText(path, _testText);
+            /*using (StreamWriter sw = File.CreateText(path))
+            {
+                sw.WriteLine(_testText);
+            }
         }
-    } 
+        else
+        {
+            using (StreamWriter sw = File.AppendText(path))
+            {
+                sw.WriteLine(_testText);
+            }*/
+        }
+
+
+        /*
+        FileInfo _fileTXT = new FileInfo("LogFight.txt");
+        _fileTXT.Create();
+        StreamWriter sw = new StreamWriter("LogFight.txt");
+        sw.WriteLine(_testText);
+        sw.Close();
+        //_fileTXT.WriteLine
+        sw.Write*/
+    }
 } 
