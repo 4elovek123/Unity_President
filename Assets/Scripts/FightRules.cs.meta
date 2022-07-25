@@ -3,12 +3,7 @@ guid: 527a04d08200ab54b8e26579a5b65201
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - _canvasCamera: {instanceID: 0}
-  - _FactorEconomic: {fileID: 6341067332483023085, guid: e9d88a9a6d770f6419e60fd54b85014b, type: 3}
-  - _FactorHealth: {fileID: 6341067332483023085, guid: 699c3ce288448bb4585f96d2055a6549, type: 3}
-  - _FactorMaterials: {fileID: 438058805628143581, guid: 18c73bb6e571375459edaa278ac15f11, type: 3}
-  - _FactorFood: {fileID: 6341067332483023085, guid: 577a6cd6d0229e647a3a42f053c10ce2, type: 3}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

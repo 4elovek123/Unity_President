@@ -1,159 +1,56 @@
+ The opponent used the card: elections to Enemy_Food
+
+ OurMorale 157
+ MoraleEnemy 131
+ We used the card airStrike to Enemy_Materials
 
  OurMorale 158
- MoraleEnemy -1
- We used the card airStrike to Materials
+ MoraleEnemy 131
+ The opponent used the card: diplomaticImmunty to Enemy_Health
 
- OurMorale 159
- MoraleEnemy 6
- The opponent used the card: energyExpansion to Economic
-
- OurMorale 159
- MoraleEnemy 10
- We used the card airStrike to Materials
+ OurMorale 158
+ MoraleEnemy 133
+ We used the card intelligenceData to Enemy_Materials
 
  OurMorale 160
- MoraleEnemy 17
- The opponent used the card: diplomaticImmunty to Health
+ MoraleEnemy 133
+ The opponent used the card: elections to Enemy_Food
 
  OurMorale 160
- MoraleEnemy 19
- We used the card harvest to Materials
-
- OurMorale 151
- MoraleEnemy 19
- The opponent used the card: customsReform to Food
-
- OurMorale 151
- MoraleEnemy 25
- We used the card elections to Food
-
- OurMorale 143
- MoraleEnemy 25
- The opponent used the card: customsReform to Food
-
- OurMorale 143
- MoraleEnemy 31
- We used the card airStrike to Materials
-
- OurMorale 144
- MoraleEnemy 38
- The opponent used the card: harvest to Materials
-
- OurMorale 144
- MoraleEnemy 29
- We used the card elections to Health
-
- OurMorale 146
- MoraleEnemy 29
- The opponent used the card: educationalInfrastructure to Materials
-
- OurMorale 146
- MoraleEnemy 28
- We used the card harvest to Economic
-
- OurMorale 147
- MoraleEnemy 28
- The opponent used the card: intelligenceData to Materials
-
- OurMorale 152
- MoraleEnemy 30
- We used the card airStrike to Materials
-
- OurMorale 153
- MoraleEnemy 37
- The opponent used the card: accession to Health
-
- OurMorale 153
- MoraleEnemy 51
- We used the card airStrike to Materials
-
- OurMorale 154
- MoraleEnemy 58
- The opponent used the card: energyExpansion to Economic
-
- OurMorale 154
- MoraleEnemy 62
- We used the card airStrike to Materials
-
- OurMorale 155
- MoraleEnemy 69
- The opponent used the card: intelligenceData to Materials
-
- OurMorale 160
- MoraleEnemy 71
- We used the card airStrike to Materials
+ MoraleEnemy 135
+ We used the card airStrike to Enemy_Materials
 
  OurMorale 161
- MoraleEnemy 78
- The opponent used the card: accession to Health
+ MoraleEnemy 135
+ The opponent used the card: energyExpansion to Enemy_Economic
 
  OurMorale 161
- MoraleEnemy 92
- We used the card intelligenceData to Materials
-
- OurMorale 163
- MoraleEnemy 97
- The opponent used the card: customsReform to Food
-
- OurMorale 163
- MoraleEnemy 103
- We used the card diplomaticImmunty to Health
-
- OurMorale 165
- MoraleEnemy 103
- The opponent used the card: accession to Health
-
- OurMorale 165
- MoraleEnemy 117
- We used the card educationalInfrastructure to Materials
-
- OurMorale 164
- MoraleEnemy 117
- The opponent used the card: educationalInfrastructure to Materials
-
- OurMorale 164
- MoraleEnemy 116
- We used the card accession to Health
-
- OurMorale 178
- MoraleEnemy 116
- The opponent used the card: customsReform to Food
-
- OurMorale 178
- MoraleEnemy 122
- We used the card elections to Food
-
- OurMorale 170
- MoraleEnemy 122
- The opponent used the card: accession to Health
-
- OurMorale 170
- MoraleEnemy 136
- We used the card airStrike to Materials
-
- OurMorale 171
- MoraleEnemy 143
- The opponent used the card: accession to Health
-
- OurMorale 171
- MoraleEnemy 157
- We used the card energyExpansion to Economic
-
- OurMorale 175
- MoraleEnemy 157
- The opponent used the card: harvest to Materials
-
- OurMorale 175
- MoraleEnemy 148
- We used the card harvest to Materials
-
- OurMorale 166
- MoraleEnemy 148
- The opponent used the card: harvest to Materials
-
- OurMorale 166
  MoraleEnemy 139
- We used the card airStrike to Materials
+ We used the card intelligenceData to Enemy_Materials
+
+ OurMorale 163
+ MoraleEnemy 139
+ The opponent used the card: airStrike to Enemy_Materials
+
+ OurMorale 163
+ MoraleEnemy 140
+ We used the card airStrike to Enemy_Materials
+
+ OurMorale 164
+ MoraleEnemy 140
+ The opponent used the card: elections to Enemy_Food
+
+ OurMorale 164
+ MoraleEnemy 142
+ We used the card intelligenceData to Enemy_Materials
+
+ OurMorale 166
+ MoraleEnemy 142
+ The opponent used the card: energyExpansion to Enemy_Economic
+
+ OurMorale 166
+ MoraleEnemy 146
+ We used the card airStrike to Enemy_Materials
 
  OurMorale 167
  MoraleEnemy 146
