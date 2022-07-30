@@ -9,10 +9,9 @@ public class FightRules : MonoBehaviour
 {
     public Transform _Table;
     public GameObject _Arrow;
+
     public Factor_Item[] _FactorItemPresident = new Factor_Item[3];
     public Factor_Item[] _FactorItemPresidentEnemy = new Factor_Item[3];
-    //public GameObject[] _President = new GameObject[3];
-    //public GameObject[] _EnemyPresident = new GameObject[3];
 
     int[] MoralePresident = new int[3];
     int[] MoralePresidentEnemy = new int[3];
@@ -56,6 +55,7 @@ public class FightRules : MonoBehaviour
     public GameObject Folder_FightCardPlace;
     public GameObject Folder_FightCardInScene;
     private int counter_card = 0; // передаём номер карты из массива карт (j в цикле) 
+    private string _idCard = "";
     private int _costCard = 0;
     private int _materialsCard = 0;
     private int _economicCard = 0;
@@ -68,6 +68,15 @@ public class FightRules : MonoBehaviour
     private int _deltamorale_positive = 0;
     private int _deltamorale_negative = 0;
 
+    private int _ourBuffAttack = 0; // общая атака всех президентов 
+    private int _enemyBuffAttack = 0; // общая атака всех президентов 
+
+    private int _ourBuffFortune = 0; // общая атака всех президентов 
+    private int _enemyBuffFortune = 0; // общая атака всех президентов 
+
+    private int _ourBuffDiplomation = 0; // общая атака всех президентов 
+    private int _enemyBuffDiplomation = 0; // общая атака всех президентов 
+
     private bool _helperMain = true;
     private bool _helper = true;
     private bool _helper101 = false; ///////////////
@@ -75,13 +84,12 @@ public class FightRules : MonoBehaviour
     private bool _helperScaleCardIsTrue = false;
     private bool _boolOutlineToFactor = false;
 
-    private string[] _FactorsOnFigtCard;
-
     Transform _FirstSelectionFightCard = null;
     Transform _factorForAnimLogo;
 
     private Transform _dragFactor = null; // Фактор, который выбрали мы
-    private Transform _dragFactorEnemy = null; // Фактор, который выбрал враг 
+    // private Transform _dragFactorEnemy = null; // Фактор, который выбрал враг 
+    private string _dragFactorName;
 
     private int _materials_ability_protect = 0;
     private int _economic_ability_protect = 0;
@@ -90,8 +98,10 @@ public class FightRules : MonoBehaviour
     private int _food_ability_protect = 0;
 
     [TextArea]
-    private string _testText;  // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
-    public Transform _scrollViewContent; // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
+    private string _testText1;  // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
+    private string _testText2;  // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
+    public Transform _scrollViewContent1; // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
+    public Transform _scrollViewContent2; // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
     private AnimationClip PresidentAnimation;
 
     private Transform[] ImageBuf = new Transform[3];
@@ -99,7 +109,19 @@ public class FightRules : MonoBehaviour
 
     public Material _redBoom;
     public Material _greenBoom;
-    public Material _OtherMatBoom;
+    public Material _MaterialBoom; 
+
+    private int _multiplyBlockOurEconomic = 1; // множители для эффекта от карт защит. Если 1, то никакого действия не оказывает. Если 0, то блокируется урон при подсчёте 
+    private int _multiplyBlockOurMaterials = 1;
+    private int _multiplyBlockOurFood = 1;
+    private int _multiplyBlockOurHealth = 1;
+
+    private int _multiplyBlockEnemyEconomic = 1; // множители для эффекта от карт защит. Если 1, то никакого действия не оказывает. Если 0, то блокируется урон при подсчёте 
+    private int _multiplyBlockEnemyMaterials = 1;
+    private int _multiplyBlockEnemyFood = 1;
+    private int _multiplyBlockEnemyHealth = 1;
+
+    private string path = Application.streamingAssetsPath + "/" + "log.txt"; // создали лог-файл 
 
     void Start()
     {
@@ -122,13 +144,17 @@ public class FightRules : MonoBehaviour
 
         for (int i = 0; i < _FightCardOnTable.Length; i++) // анимация боевых карточек
         {
-            Animation anim = _FightCardOnTable[i].transform.GetComponent<Animation>();
-            anim.Play("FightCardStartAnimation");
+            // Animation anim = _FightCardOnTable[i].transform.GetComponent<Animation>();
+            // anim.Play("FightCardStartAnimation"); 
+
+            Animator animatorOpen = _FightCardOnTable[i].transform.GetComponent<Animator>();
+            animatorOpen.SetBool("Start", true);
+
         }
-        
-        Animation animTable = _Table.transform.GetComponent<Animation>();
+
+        Animation animTable = _Table.transform.GetComponent<Animation>(); // анимируется стол 
         animTable.Play("TableRotateAnimation");
-        
+
     }
 
     public void RandomFightCardToPlace() // заносим в массивы все карты сцены, места для карт за столом, выбираем рандомные, помещаем за стол. Рассчитывается при нажатии кнопки "Ready" 
@@ -158,7 +184,7 @@ public class FightRules : MonoBehaviour
             return num;
         }
 
-        int[] MixArray = Mix(_random); // перемешанный массив для выбора случайных карт из _FightCardInScene
+        int[] MixArray = Mix(_random); // перемешанный массив для выбора случайных карт из _FightCardInScene 
 
         myItemListCard = jSONControllerCard.myListFightCard; // вытягиваем лист со скрипта jSON 
         for (int i = 0; i < _FightCardPlace.Length; i++) // пробежались по всем Place будущих карт 
@@ -166,8 +192,10 @@ public class FightRules : MonoBehaviour
             _FightCardPlace[i] = Folder_FightCardPlace.transform.GetChild(i).transform; // занесли их в массив _FightCardPlace[] 
             _FightCardOnTable[i] = _FightCardInScene[MixArray[i]]; // заполнили массив случайными картами
             _FightCardOnTable[i].transform.SetParent(_FightCardPlace[i]); // поместили боевые карты в Place[] 
+
             _FightCardOnTable[i].transform.localPosition = Vector3.zero; // сбросили позицию 
             _FightCardOnTable[i].transform.localRotation = Quaternion.identity; // сбросили вращение 
+            //_FightCardOnTable[i].transform.localScale = Vector3.one;
 
             for (int j = 0; j < myItemListCard.fight_card.Length; j++) // пробежались по всем картам из JSON-файла 
             {
@@ -179,7 +207,6 @@ public class FightRules : MonoBehaviour
         }
 
         StartAnimation();
-
     }
 
     public void StartButton() // выставляем карты президентов 
@@ -209,11 +236,14 @@ public class FightRules : MonoBehaviour
             _economic_ability_attack += _FactorItemPresident[i]._economic_ability_attack;
             _health_ability_protect += _FactorItemPresident[i]._health_ability_protect;
             _food_ability_protect += _FactorItemPresident[i]._food_ability_protect;
+            _ourBuffAttack = _ourBuffAttack + _FactorItemPresident[i]._buff_attack; // суммируем атаки всех президентов
+            _ourBuffFortune = _ourBuffFortune + _FactorItemPresident[i]._buff_fortune; // суммируем атрибуты удачи всех президентов
+            _ourBuffDiplomation = _ourBuffDiplomation + _FactorItemPresident[i]._buff_diplomation; // суммируем атрибуты дипломатии всех президентов
 
             _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[0].color = _FactorItemPresident[i].ImageBuf[0].GetComponent<Image>().color;
             _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[1].color = _FactorItemPresident[i].ImageBuf[1].GetComponent<Image>().color;
             _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[2].color = _FactorItemPresident[i].ImageBuf[2].GetComponent<Image>().color;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[0].color = _FactorItemPresident[i].ImageBuf[3].GetComponent<Image>().color;
+            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[3].color = _FactorItemPresident[i].ImageBuf[3].GetComponent<Image>().color;
         }
 
         for (int i = 0; i < _PresidentsEnemy_before.Length; i++) // копируем свойства UI президентов на 3D карты президентов-противников 
@@ -236,6 +266,9 @@ public class FightRules : MonoBehaviour
             _enemyBUFFhealth += _FactorItemPresidentEnemy[i]._BUFFhealth;
             _enemyBUFFfood += _FactorItemPresidentEnemy[i]._BUFFfood;
             _enemyBUFFeconomic += _FactorItemPresidentEnemy[i]._BUFFeconomic;
+            _enemyBuffAttack = _enemyBuffAttack + _FactorItemPresidentEnemy[i]._buff_attack; // суммируем атаки всех президентов 
+            _enemyBuffFortune = _enemyBuffFortune + _FactorItemPresidentEnemy[i]._buff_fortune; // суммируем атрибуты удачи всех президентов
+            _enemyBuffDiplomation = _enemyBuffDiplomation + _FactorItemPresidentEnemy[i]._buff_diplomation; // суммируем атрибуты дипломатии всех президентов
 
             _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[0].color = _FactorItemPresidentEnemy[i].ImageBuf[0].GetComponent<Image>().color;
             _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[1].color = _FactorItemPresidentEnemy[i].ImageBuf[1].GetComponent<Image>().color;
@@ -244,9 +277,11 @@ public class FightRules : MonoBehaviour
         }
         ReadyFight();
         ReadyFight2();
+
+        // path = Application.streamingAssetsPath + "/" + "log.txt"; // создали лог-файл 
     }
 
-    void calcLocationFactorsOur() // расставляем наши факторы, пока топорно без зависимости от выбора президента
+    void calcLocationFactors() // расставляем факторы, пока топорно без зависимости от выбора президента
     {
         _FactorMaterials.transform.SetParent(_PlaceFactor[0]);
         _FactorMaterials.transform.localPosition = Vector3.zero;
@@ -271,10 +306,7 @@ public class FightRules : MonoBehaviour
         _FactorHealth.transform.localRotation = Quaternion.identity;
         _FactorHealth.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
         _PlaceFactor[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFhealth; // хп здравоохранения 
-    }
 
-    void calcLocationFactorsEnemy() // расставляем факторы врага 
-    {
         _FactorMaterialsEnemy.transform.SetParent(_PlaceFactorEnemy[0]);
         _FactorMaterialsEnemy.transform.localPosition = Vector3.zero;
         _FactorMaterialsEnemy.transform.localRotation = Quaternion.identity;
@@ -298,7 +330,8 @@ public class FightRules : MonoBehaviour
         _FactorHealthEnemy.transform.localRotation = Quaternion.identity;
         _FactorHealthEnemy.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
         _PlaceFactorEnemy[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFhealth; // хп здравоохранения 
-    }
+
+        }
 
     void Update()
     {
@@ -312,23 +345,27 @@ public class FightRules : MonoBehaviour
                 {
                     if (_hit.transform.name == _FightCardOnTable[k].name) // выяснили имя карты, по которой попали 
                     {
+
+
                         if (_FirstSelectionFightCard != _hit.transform && _FirstSelectionFightCard != null && _helper105 == false) // если перескочили с карты на карту 
                         {
                             _helper105 = true;
                             AnimationScaleCardClose(_FirstSelectionFightCard); // закрываем предыдущую 
                         }
-                        if (_helper101 == false)
+
+                        if (_hit.transform != _hitLast) // если выбрали карту, которая НЕ была на предыдущем шаге
                         {
-                            _helper101 = true; // хелпер, чтобы не гонять постоянно в Update
-                            counter_card = k;
-                            AnimationScaleCardOpen(_FightCardOnTable[counter_card]); // анимация открытия текущей карты 
-                            FightCard(counter_card);
+                            _helper = true; // разрешение щелкнуть мышкой по карте 
+
+                            if (_helper101 == false)
+                            {
+                                _helper101 = true; // хелпер, чтобы не гонять постоянно в Update
+                                counter_card = k;
+                                AnimationScaleCardOpen(_FightCardOnTable[counter_card]); // анимация увеличения текущей карты 
+                                FightCard(counter_card);
+                            }
                         }
-                        if (_hit.transform == _hitLast) // если выбрали снова карту, которая была на предыдущем шаге, то не пускаем дальше 
-                        {
-                            _helper = false;
-                        }
-                        else _helper = true; 
+                        else _helper = false; // иначе не разрешаем щелкать по ней 
                     }
                 }
             }
@@ -347,49 +384,53 @@ public class FightRules : MonoBehaviour
         {
             _helper = false;
             _helperMain = false; // выключаем, чтобы не обрабатывать 1 этап (рейкаст и тп при наведении мышки на боевые карты) 
-            _FactorsOnFigtCard = new string[4]; // факторы, которые есть на выбранной боевой карте, используются далее 
+
+            if (_hitLast != null)
+            {
+                _hitLast.transform.localRotation = Quaternion.identity; // и перевернули закрытую карту рубашкой обратно 
+            }
+
             AnimationTransformCard(_FightCardOnTable[counter_card]); // анимация вылета выбранной карты на середину колоды 
+
         }
 
-        if (_boolOutlineToFactor == true) // рейкаст по нужным факторам 
+        if (_boolOutlineToFactor == true) // рейкаст по нужным факторам, когда нажали на боевую карту 
         {
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 1));
             RaycastHit _hit;
-            if (Physics.Raycast(ray, out _hit, Mathf.Infinity)) // рейкаст, вычисляем наведение мышки на фактор 
+            if (Physics.Raycast(ray, out _hit, Mathf.Infinity) && _hit.collider.tag == "Factors") // рейкаст, вычисляем наведение мышки на фактор 
             {
-                for (int k = 0; k < _FactorsOnFigtCard.Length; k++)
+                if (_attackCard == 1 || _diplomationCard == 1) // атака и дипломатия ориентированы на факторы противника 
                 {
-                    if (_hit.transform.name == _FactorsOnFigtCard[k] && Input.GetMouseButtonDown(0)) // если мы нажали на нужный фактор 
+                    for (int k = 0; k < _PlaceFactorEnemy.Length; k++) // цикл, чтобы узнать название фактора 
                     {
-                         _boolOutlineToFactor = false; // выключили обработку в Update 
-                        _dragFactor = _hit.transform; // узнали, какой фактор выбрали 
+                        if (_hit.transform.name == _PlaceFactorEnemy[k].name && Input.GetMouseButtonDown(0)) // если мы нажали на нужный фактор // Внимание, _hit.transform не равен _PlaceFactorEnemy[k], потому что рейкаст работает по Child, а _PlaceFactorEnemy - это родитель. Но имена одинаковые. Решил оставить сравнение по имени, чтобы не искать Child  
+                        {
+                            _boolOutlineToFactor = false; // выключили обработку в Update 
+                            _dragFactor = _hit.transform; // узнали, какой фактор выбрали 
 
-                        AnimationArrow(_dragFactor); // вызываем анимацию стрелки 
+                            AnimationArrow(_dragFactor); // вызываем анимацию стрелки 
+                        }
+                    }
+                }
+                else if (_protectCard == 1 || _fortuneCard == 1)
+                {
+                    for (int k = 0; k < _PlaceFactor.Length; k++) // цикл, чтобы узнать название фактора 
+                    {
+                        if (_hit.transform.name == _PlaceFactor[k].name && Input.GetMouseButtonDown(0)) // если мы нажали на нужный фактор 
+                        {
+                            _boolOutlineToFactor = false; // выключили обработку в Update 
+                            _dragFactor = _hit.transform; // узнали, какой фактор выбрали 
+
+                            AnimationArrow(_dragFactor); // вызываем анимацию стрелки 
+                        }
                     }
                 }
             }
-
             else
             {
                 _dragFactor = null;
             }
-
-
-            /*if (Input.GetMouseButtonUp(0) == true)
-            {
-                _helper = true;
-                _helper3 = true;s
-                _helper2 = false;
-                _helper4 = true;
-
-                if (_dragFactor != null)
-                { 
-                    CalcOurFight();
-                    _dragFactor = null;
-                }
-            }
-            
-        }*/ 
         }
     }
 
@@ -400,6 +441,7 @@ public class FightRules : MonoBehaviour
         {
             if (_FightCardOnTable[k].name == myItemListCard.fight_card[j].id) // нашли совпадения с картой из JSON
             {
+                _idCard = myItemListCard.fight_card[j].id;
                 _costCard = myItemListCard.fight_card[j].cost;
                 _materialsCard = myItemListCard.fight_card[j].materials;
                 _economicCard = myItemListCard.fight_card[j].economic;
@@ -418,17 +460,22 @@ public class FightRules : MonoBehaviour
     void AnimationScaleCardOpen(Transform _y) // анимация размера боевой карты, которая проигрывается при наведении мыши 
     {
         _FirstSelectionFightCard = _y;
-        Animation animOpen = _y.transform.GetComponent<Animation>();
-        animOpen.Play("FightCardSelectOpen"); 
+
+        _y.localPosition = new Vector3(_y.localPosition.x, 0.05f, _y.localPosition.z); // если использовать ротатор для смещения карты на нас (чтобы избежать Z файтинга, когда карта увеличивается), получается глюк, когда карта из раза в раз постепенно смещается от 0,0,0. Поэтому задаем смещение карты на себя без анимации, "железно" 
+
+        Animator animatorOpen = _y.transform.GetComponent<Animator>();
+        animatorOpen.SetBool("Open", true);
         _helperScaleCardIsTrue = true; // хелпер переключился, мы знаем, что объект заскейлен 
         _helper105 = false;
     }
 
-
-    void AnimationScaleCardClose(Transform _y) // анимация размера боевой карты, которая проигрывается при наведении мыши 
+    void AnimationScaleCardClose(Transform _y) // анимация размера боевой карты, которая проигрывается при убирании мыши 
     {
-        Animation animClose = _y.transform.GetComponent<Animation>();
-        animClose.Play("FightCardSelectClose"); 
+        _y.localPosition = new Vector3(_y.localPosition.x, 0, _y.localPosition.z); // если использовать ротатор для смещения карты на нас (чтобы избежать Z файтинга, когда карта увеличивается), получается глюк, когда карта из раза в раз постепенно смещается от 0,0,0. Поэтому задаем смещение карты на себя без анимации, "железно"
+
+        Animator animatorOpen = _y.transform.GetComponent<Animator>();
+        animatorOpen.SetBool("Open", false);
+
         _helperScaleCardIsTrue = false;
         _helper101 = false;
     }
@@ -436,67 +483,32 @@ public class FightRules : MonoBehaviour
     void AnimationTransformCard(Transform _y) // анимация вылета боевой карты на центр, которая проигрывается при нажатии кнопк мыши, и других 
     {
         _y.transform.position = new Vector3(_camera.ViewportToWorldPoint(new Vector3(.5f, .5f, 0)).x, _y.transform.position.y, _y.transform.position.z); // карта на центр колоды 
-        _helper101 = false; 
-
-        if(_attackCard == 1 || _diplomationCard == 1)  // включаем анимацию логотипов у нужных факторов (смотрим на данные выбранной карты) 
-        {                                              // пока у нас жесткая привязка, на Place0 - Materials, 1 - Food, 2 - Economic, 3 - Health 
-            if (_materialsCard == 1)
-            {
-                AnimationFactors(_PlaceFactorEnemy[0], "Enemy_Materials"); // атака и дипломатия ориентирована на факторы противника 
-                _FactorsOnFigtCard[0] = "Enemy_Materials";
-            }
-            if (_foodCard == 1)
-            {
-                AnimationFactors(_PlaceFactorEnemy[1], "Enemy_Food");
-                _FactorsOnFigtCard[1] = "Enemy_Food";
-            }
-            if (_economicCard == 1)
-            {
-                AnimationFactors(_PlaceFactorEnemy[2], "Enemy_Economic");
-                _FactorsOnFigtCard[2] = "Enemy_Economic";
-            }
-            if (_healthCard == 1)
-            {
-                AnimationFactors(_PlaceFactorEnemy[3], "Enemy_Health");
-                _FactorsOnFigtCard[3] = "Enemy_Health";
-            }
-        }
-        
-        if (_protectCard == 1 || _fortuneCard == 1) // защита и удача ориентирована на свои факторы
+        _helper101 = false;
+        // включаем анимацию логотипов у нужных факторов 
+        if (_attackCard == 1 || _diplomationCard == 1) // атака и дипломатия ориентированы на факторы противника 
         {
-            if (_materialsCard == 1)
+            for (int i = 0; i < _PlaceFactorEnemy.Length; i++)
             {
-                AnimationFactors(_PlaceFactor[0], "Our_Materials");
-                _FactorsOnFigtCard[0] = "Our_Materials";
-            }
-            if (_foodCard == 1)
-            {
-                AnimationFactors(_PlaceFactor[1], "Our_Food");
-                _FactorsOnFigtCard[1] = "Our_Food";
-            }
-            if (_economicCard == 1)
-            {
-                AnimationFactors(_PlaceFactor[2], "Our_Economic");
-                _FactorsOnFigtCard[2] = "Our_Economic";
-            }
-            if (_healthCard == 1)
-            {
-                AnimationFactors(_PlaceFactor[3], "Our_Health");
-                _FactorsOnFigtCard[3] = "Our_Health";
+                AnimationFactors(_PlaceFactorEnemy[i]); // запускаем анимацию всех логотипов, предлагая игроку выбрать фактор 
             }
         }
 
-
-    } 
-
-    void AnimationFactors(Transform _factorForAnim, string _name) // запускаем анимацию Лого факторов 
-    {
-        _factorForAnimLogo = _factorForAnim.transform.Find(_name).transform.Find("Logo"); // нашли Логотип фактора 
-        Animator animatorFactor = _factorForAnimLogo.transform.GetComponent<Animator>(); // достали аниматор 
-        animatorFactor.SetBool ("StartRotate", true); // включили вращение логотипа 
-        _boolOutlineToFactor = true; // отмечаем, что прошли этап, в Update нужно рейкастить фактор, по которому щелкнем мышью
+        if (_protectCard == 1 || _fortuneCard == 1) // защита и удача ориентированы на свои факторы
+        {
+            for (int i = 0; i < _PlaceFactor.Length; i++)
+            {
+                AnimationFactors(_PlaceFactor[i]); // запускаем анимацию всех логотипов, предлагая игроку выбрать фактор 
+            }
+        }
     }
 
+    void AnimationFactors(Transform _factorForAnim) // запускаем анимацию Лого факторов 
+    {
+        _factorForAnimLogo = _factorForAnim.transform.Find(_factorForAnim.name).transform.Find("Logo"); // нашли Логотип фактора 
+        Animator animatorFactor = _factorForAnimLogo.transform.GetComponent<Animator>(); // достали аниматор 
+        animatorFactor.SetBool("StartRotate", true); // включили вращение логотипа 
+        _boolOutlineToFactor = true; // отмечаем, что прошли этап, в Update нужно рейкастить фактор, по которому щелкнем мышью
+    }
 
     void AnimationArrow(Transform _dragFactorForArrow) // вычисляем, по какому фактору нужна анимация стрелки 
     {
@@ -508,7 +520,7 @@ public class FightRules : MonoBehaviour
         if (_dragFactorForArrow.name == "Our_Materials")
         {
             _arrowanim.SetInteger("_selectArrow", 1); // в зависимости от фактора, запускаем анимацию стрелки 
-        }   
+        }
         if (_dragFactorForArrow.name == "Our_Food")
         {
             _arrowanim.SetInteger("_selectArrow", 2);
@@ -537,23 +549,29 @@ public class FightRules : MonoBehaviour
         {
             _arrowanim.SetInteger("_selectArrow", 8);
         }
-
         StartCoroutine(Pause()); // вызываем паузу для прохождения анимации стрелки 
-
     }
 
-    IEnumerator Pause() 
+    IEnumerator Pause() // пауза анимации стрелки
     {
-        yield return new WaitForSeconds (2); // пока так, в секундах. Через 2 сек закончилась анимация стрелки 
+        yield return new WaitForSeconds(1.25f); // пока так, в секундах. Через 2 сек закончилась анимация стрелки 
         StopAnimationFactors(); // остановили все логотипы 
         _Arrow.SetActive(false); // выключили стрелку 
 
+        if (_attackCard == 1 || _diplomationCard == 1) // если атака или диломатия
+        {
+            _MaterialBoom.CopyPropertiesFromMaterial(_redBoom); // меняем цвета у частиц на красный 
+        }
+        else if (_protectCard == 1 || _fortuneCard == 1) // если защита или удача 
+        {
+            _MaterialBoom.CopyPropertiesFromMaterial(_greenBoom); // меняем цвета у частиц на зеленый  
+        }
+
         _dragFactor.Find("Boom").gameObject.SetActive(true); // включили фейерверк 
-        StartCoroutine(Pause2()); 
+        StartCoroutine(Pause2());
+    }
 
-    } 
-
-    void StopAnimationFactors() // пока так топорно и с Find останавливаем анимацию Лого , потом убрать 
+    void StopAnimationFactors() // пока так топорно и с Find останавливаем анимацию Лого, потом убрать 
     {
         for (int i = 0; i < _PlaceFactor.Length; i++)
         {
@@ -563,29 +581,33 @@ public class FightRules : MonoBehaviour
         {
             _PlaceFactorEnemy[i].transform.Find(_PlaceFactorEnemy[i].name).transform.Find("Logo").transform.GetComponent<Animator>().SetBool("StartRotate", false);
         }
-    } 
+    }
 
-    IEnumerator Pause2()
+    IEnumerator Pause2() // пауза анимации нашего фейерверка 
     {
         yield return new WaitForSeconds(1); // пока так, в секундах. Через 1 сек закончилась анимация взрыва 
-        ResetAnimationCard(); 
-    } 
+        ResetAnimationCard();
+    }
 
-    void ResetAnimationCard()//(Transform y)
-    {
-        _factorForAnimLogo.parent.Find("Boom").gameObject.SetActive(false); // выключили фейерверк 
-        _FightCardOnTable[counter_card].transform.localScale = Vector3.one; // вернули карту на место 
-        _FightCardOnTable[counter_card].transform.localPosition = Vector3.zero;
-        Debug.Log("OK ");
+    void ResetAnimationCard()
+    { 
+        _dragFactor.Find("Boom").gameObject.SetActive(false); // выключили фейерверк 
+
+        AnimationScaleCardClose(_FightCardOnTable[counter_card]); // сбросили анимацию карты 
+        _FightCardOnTable[counter_card].transform.localPosition = Vector3.zero; // вернули карту на место 
+        _FightCardOnTable[counter_card].transform.Rotate(0, 0, 180); // и перевернули рубашкой вверх 
+
         CalcOurFight(); // вызываем расчёт очков в бою 
     }
 
     void CalcOurFight() // Расчёт очков в бою после нашего хода 
     {
-        Debug.Log("CalcOurFight!"); 
         if (_dragFactor != null)
         {
-            _testText = " We used the card " + _FightCardOnTable[counter_card].name + " to " + _dragFactor.name + "\n" + _testText;
+            RenameFactors(); 
+            _testText1 = " We used the card " + _FightCardOnTable[counter_card].name + " to " + _dragFactorName + "\n" + _testText1;
+            _testText2 = " We used the card " + _FightCardOnTable[counter_card].name + " to " + _dragFactorName + "\n" + _testText2;
+
             /*
             _materials_ability_protect
             _economic_ability_protect
@@ -604,297 +626,428 @@ public class FightRules : MonoBehaviour
             _enemyBUFFmaterial = 0; 
 
             */
-            Debug.Log("_enemyBUFFmaterial After OUR" + _enemyBUFFmaterial);
+
             if (_attackCard == 1)
-            {
-                if (_materialsCard == 1)// && _dragFactor.name == "Our_Materials")
-                {
-                    _enemyBUFFmaterial = _enemyBUFFmaterial - _deltamorale_positive;
-                    _totalMoralePresident = _totalMoralePresident - _costCard;
-                }
-                else if (_economicCard == 1)// && _dragFactor.name == "Our_Economic")
-                {
-                    _enemyBUFFeconomic = _enemyBUFFeconomic - _deltamorale_positive;
-                    _totalMoralePresident = _totalMoralePresident - _costCard;
-                }
-                else if (_healthCard == 1)// && _dragFactor.name == "Our_Health")
-                {
-                    _enemyBUFFhealth = _enemyBUFFhealth - _deltamorale_positive;
-                    _totalMoralePresident = _totalMoralePresident - _costCard;
-                }
-                else if (_foodCard == 1)// && _dragFactor.name == "Our_Food")
-                {
-                    _enemyBUFFfood = _enemyBUFFfood - _deltamorale_positive;
-                    _totalMoralePresident = _totalMoralePresident - _costCard;
-                }
-                else
-                {
-                    _totalMoralePresident = _totalMoralePresident - _costCard; // на всякий, случиться не должно 
-                }
+            { 
+                CalcDamageAtack(true); // пересчитали урон на мораль или факторы врага 
+                CalcCoastFactors(true); // вычли цену карты из фактора 
             }
             else
             {
                 if (_protectCard == 1)
                 {
-                    if (_materialsCard == 1)// && _dragFactor.name == "Our_Materials")
-                    {
-                        _ourBUFFmaterial = _ourBUFFmaterial - _deltamorale_negative - _costCard;
-                    }
-                    else if (_economicCard == 1)// && _dragFactor.name == "Our_Economic")
-                    {
-                        _ourBUFFeconomic = _ourBUFFeconomic - _deltamorale_negative - _costCard;
-                    }
-                    else if (_healthCard == 1) // && _dragFactor.name == "Our_Health")
-                    {
-                        _ourBUFFhealth = _ourBUFFhealth - _deltamorale_negative - _costCard;
-                    }
-                    else if (_foodCard == 1) // && _dragFactor.name == "Our_Food")
-                    {
-                        _ourBUFFfood = _ourBUFFfood - _deltamorale_negative - _costCard;
-                    }
-                    else
-                    { 
-                        _totalMoralePresident = _totalMoralePresident - _costCard;  // на всякий, случиться не должно 
-                    }
+                    CalcDamageProtect(true);
+                    CalcCoastFactors(true); // вычли цену карты из фактора  
                 }
                 else
                 {
                     if (_diplomationCard == 1) // по дипломатии пока нет функционала 
                     {
-                        if (_materialsCard == 1)// && _dragFactor.name == "Our_Materials")
-                        {
-                            _totalMoralePresident = _totalMoralePresident - _costCard;
-                        }
-                        else if (_economicCard == 1) //&& _dragFactor.name == "Our_Economic")
-                        {
-                            _totalMoralePresident = _totalMoralePresident - _costCard;
-                        }
-                        else if (_healthCard == 1) // && _dragFactor.name == "Our_Health")
-                        {
-                            _totalMoralePresident = _totalMoralePresident - _costCard;
-                        }
-                        else if (_foodCard == 1) // && _dragFactor.name == "Our_Food")
-                        {
-                            _totalMoralePresident = _totalMoralePresident - _costCard;
-                        }
-                        else _totalMoralePresident = _totalMoralePresident - _costCard; // на всякий, случиться не должно 
+                        CalcDamageDiplomation(true);
+                        CalcCoastFactors(true); // вычли цену карты из фактора 
                     }
                     else
                     {
                         if (_fortuneCard == 1)
                         {
-                            if (_materialsCard == 1) // && _dragFactor.name == "Our_Materials")
-                            {
-                                int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                                _ourBUFFmaterial = _ourBUFFmaterial + _randomDeltaMorale[Random.Range(0, 1)]; // если +, то суммируем, если -, то вычитаем 
-                                _totalMoralePresident  = _totalMoralePresident - _costCard; 
-                            }
-                            else if (_economicCard == 1) // && _dragFactor.name == "Our_Economic")
-                            {
-                                int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                                _ourBUFFeconomic = _ourBUFFeconomic + _randomDeltaMorale[Random.Range(0, 1)]; // если +, то суммируем, если -, то вычитаем 
-                                _totalMoralePresident = _totalMoralePresident - _costCard;
-                            }
-                            else if (_healthCard == 1) //  && _dragFactor.name == "Our_Health")
-                            {
-                                int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                                _ourBUFFhealth = _ourBUFFhealth + _randomDeltaMorale[Random.Range(0, 1)]; // если +, то суммируем, если -, то вычитаем 
-                                _totalMoralePresident = _totalMoralePresident - _costCard;
-                            }
-                            else if (_foodCard == 1) // && _dragFactor.name == "Our_Food")
-                            {
-                                int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                                _ourBUFFfood = _ourBUFFfood + _randomDeltaMorale[Random.Range(0, 1)]; // если +, то суммируем, если -, то вычитаем 
-                                _totalMoralePresident = _totalMoralePresident - _costCard;
-                            }
-                            else _totalMoralePresident = _totalMoralePresident - _costCard; // на всякий, случиться не должно 
+                            CalcCoastFactors(true); // вычли цену карты из фактора
+                            CalcDamageFortune(true); 
                         }
                     }
                 }
             }
         }
 
-        if (_ourBUFFmaterial < 0) _ourBUFFmaterial = 0; // очки факторов не могут быть отрицательными 
-        if (_ourBUFFeconomic < 0) _ourBUFFeconomic = 0; 
-        if (_ourBUFFhealth < 0) _ourBUFFhealth = 0; 
-        if (_ourBUFFfood < 0) _ourBUFFfood = 0; 
 
-        Debug.Log("_enemyBUFFmaterial_2 After OUR" + _enemyBUFFmaterial);
         ReadyFight2(); // Вызываем вывод нужных данных на экран 
-        StartCoroutine(PauseOurCoroutine());
-    }
-
-    IEnumerator PauseOurCoroutine() // Пауза после нашего хода 
-    {
-        Debug.Log("PauseOurCoroutine!");
-        yield return new WaitForSeconds(0.1f);
+        Reset_multiplyBlock(false); // обнуляем эффект от карты соперника "Защита" (на факторы соперника) после нашего хода 
         CalcEnemyFight(); // Ход соперника 
     }
 
     void CalcEnemyFight() // Соперник "Выбирает" карту 
     {
-        Debug.Log("CalcEnemyFight!");
-        int _enemy = Random.Range(0, _FightCardOnTable.Length - 1); // выбираем карту (за столом) наугад 
+        int _enemy = Random.Range(0, _FightCardOnTable.Length); // выбираем карту (за столом) наугад 
         FightCard(_enemy); // получаем её данные 
-        //string _dragFactorEnemy = "";
-        if (_materialsCard == 1) _dragFactorEnemy = _FactorMaterialsEnemy;
-        else
+
+        if (_attackCard == 1 || _diplomationCard == 1) // атака и дипломатия ориентированы на факторы противника 
         {
-            if (_economicCard == 1) _dragFactorEnemy = _FactorEconomicEnemy;
-            else
-            {
-                if (_healthCard == 1) _dragFactorEnemy = _FactorHealthEnemy;
-                else
-                {
-                    if (_foodCard == 1) _dragFactorEnemy = _FactorFoodEnemy;
-                }
-            }
+            int i = Random.Range(0, 4); // int инклюзивный, 4 не входит, выбор от 0 до 3 
+            _dragFactor = _PlaceFactor[i].Find(_PlaceFactor[i].name); 
         }
 
-        _testText = " The opponent used the card: " + _FightCardOnTable[_enemy].name + " to " + _dragFactorEnemy.name + "\n" + _testText;
+        if (_protectCard == 1 || _fortuneCard == 1) // защита и удача ориентированы на свои факторы
+        {
+            int i = Random.Range(0, 4); // int инклюзивный, 4 не входит, выбор от 0 до 3 
+            _dragFactor = _PlaceFactorEnemy[i].Find(_PlaceFactorEnemy[i].name); 
+        }
+
+        RenameFactors();
+        _testText1 = " The opponent used the card " + _FightCardOnTable[_enemy].name + " to " + _dragFactorName + "\n" + _testText1;
+        _testText2 = " The opponent used the card " + _FightCardOnTable[_enemy].name + " to " + _dragFactorName + "\n" + _testText2; 
+
         StartCoroutine(PauseEnemyCoroutine()); // пауза после хода соперника 
     }
-    IEnumerator PauseEnemyCoroutine() // Пауза 
+    IEnumerator PauseEnemyCoroutine() // пауза после выбора карты соперником 
     {
-        Debug.Log("PauseEnemyCoroutine!");
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(1.5f);
         CalcEnemyFight2();
+    }
+
+    void RenameFactors()
+    {
+        if (_dragFactor.name == "Enemy_Materials" || _dragFactor.name == "Our_Materials") _dragFactorName = "Material";
+        if (_dragFactor.name == "Enemy_Economic" || _dragFactor.name == "Our_Economic") _dragFactorName = "Economic";
+        if (_dragFactor.name == "Enemy_Health" || _dragFactor.name == "Our_Health") _dragFactorName = "Health";
+        if (_dragFactor.name == "Enemy_Food" || _dragFactor.name == "Our_Food") _dragFactorName = "Food";
+    }
+
+    void CalcDamageAtack(bool _isOurAttack) // считаем урон от атаки в зависимости от типа карты (и нашего или противника Атрибута атаки) 
+    {
+        void calcDamage(int _damage)
+        {
+            if (_dragFactor.name == "Enemy_Materials")
+            {
+                _enemyBUFFmaterial = _enemyBUFFmaterial - _damage * _multiplyBlockEnemyMaterials; // Множители для эффекта от карт защит. Если 1, то никакого действия не оказывает. Если 0, то блокируется урон от атаки при подсчёте 
+            }
+            if (_dragFactor.name == "Enemy_Economic") _enemyBUFFeconomic -= _damage * _multiplyBlockEnemyEconomic; 
+            if (_dragFactor.name == "Enemy_Health") _enemyBUFFhealth -= _damage * _multiplyBlockEnemyHealth; 
+            if (_dragFactor.name == "Enemy_Food") _enemyBUFFfood -= _damage * _multiplyBlockEnemyFood; 
+
+            if (_dragFactor.name == "Our_Materials") _ourBUFFmaterial -= _damage * _multiplyBlockOurMaterials; 
+            if (_dragFactor.name == "Our_Economic") _ourBUFFeconomic -= _damage * _multiplyBlockOurEconomic;
+            if (_dragFactor.name == "Our_Health") _ourBUFFhealth -= _damage * _multiplyBlockOurHealth;
+            if (_dragFactor.name == "Our_Food") _ourBUFFfood -= _damage * _multiplyBlockOurFood; 
+        }
+
+        int _damage;
+        if (_isOurAttack) // если мы атакуем 
+        {
+            if (_idCard == "airStrike")
+            {
+                _damage = 3 + _ourBuffAttack;
+                calcDamage(_damage);
+            }
+            else if (_idCard == "intelligenceData")
+            {
+                _damage = 2 + _ourBuffAttack / 2;
+                calcDamage(_damage);
+            }
+            else if (_idCard == "sunction")
+            {
+                _damage = _ourBuffAttack / 2;
+                calcDamage(_damage);
+            }
+
+            else if (_idCard == "isolation")
+            {
+                _damage = _ourBuffAttack / 3;
+                _enemyBUFFmaterial -= _damage * _multiplyBlockEnemyMaterials;
+                _enemyBUFFeconomic -= _damage * _multiplyBlockEnemyEconomic;
+                _enemyBUFFhealth -= _damage * _multiplyBlockEnemyHealth;
+                _enemyBUFFfood -= _damage * _multiplyBlockEnemyFood;
+            }
+        }
+        else // если враг атакует 
+        {
+            if (_idCard == "airStrike")
+            {
+                _damage = 3 + _ourBuffAttack;
+                calcDamage(_damage);
+            }
+            else if (_idCard == "intelligenceData")
+            {
+                _damage = 2 + _ourBuffAttack / 2;
+                calcDamage(_damage);
+            }
+            else if (_idCard == "sunction")
+            {
+                _damage = _ourBuffAttack / 2;
+                calcDamage(_damage);
+            }
+
+            else if (_idCard == "isolation")
+            {
+                _damage = _ourBuffAttack / 3;
+                _ourBUFFmaterial = _ourBUFFmaterial - _damage * _multiplyBlockOurMaterials; 
+                _ourBUFFeconomic = _ourBUFFeconomic - _damage * _multiplyBlockOurEconomic;
+                _ourBUFFhealth = _ourBUFFhealth - _damage * _multiplyBlockOurHealth;
+                _ourBUFFfood = _ourBUFFfood - _damage * _multiplyBlockOurFood;
+            }
+        }
+    }
+
+    void CalcDamageProtect(bool _isOurAttack) // считаем эффект от защиты в зависимости от типа карты (и нашего или противника Атрибута атаки) 
+    {
+        if (_isOurAttack) // если мы ходим  
+        {
+            if (_idCard == "customsReform")
+            {
+                _totalMoralePresident = _totalMoralePresident - 5;
+                _multiplyBlockOurEconomic = 0;
+            }
+            else if (_idCard == "militaryPosition")
+            {
+                _totalMoralePresident = _totalMoralePresident - 5;
+                _multiplyBlockOurMaterials = 0;
+            }
+            else if (_idCard == "pestControl")
+            {
+                _totalMoralePresident = _totalMoralePresident - 5;
+                _multiplyBlockOurFood = 0;
+            }
+            else if (_idCard == "accession")
+            {
+                _totalMoralePresident = _totalMoralePresident - 10;
+                _multiplyBlockOurEconomic = 0;
+                _multiplyBlockOurMaterials = 0;
+                _multiplyBlockOurFood = 0;
+                _multiplyBlockOurHealth = 0;
+            }
+        }
+        else // если враг атакует 
+        {
+            if (_idCard == "customsReform")
+            {
+                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - 5;
+                _multiplyBlockEnemyEconomic = 0;
+            }
+            else if (_idCard == "militaryPosition")
+            {
+                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - 5;
+                _multiplyBlockEnemyMaterials = 0;
+            }
+            else if (_idCard == "pestControl")
+            {
+                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - 5;
+                _multiplyBlockEnemyFood = 0;
+            }
+
+            else if (_idCard == "accession")
+            {
+                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - 10;
+                _multiplyBlockEnemyEconomic = 0;
+                _multiplyBlockEnemyMaterials = 0;
+                _multiplyBlockEnemyFood = 0;
+                _multiplyBlockEnemyHealth = 0;
+            }
+        }
+    }
+
+    void CalcDamageDiplomation(bool _isOurAttack)
+    {
+        int _damageOur(int _addBufDiplomation) // расчёт _multiplyBlockOur в зависимости от шансов (прокачанная дипломатия) 
+        {
+            int result = 0;
+            if (Random.Range(0, 101) >= _ourBuffDiplomation + _addBufDiplomation) // выбираем рандомное значение от 0 до 100% с вероятностью выбора в _ourBuffDiplomation + _addBufDiplomation процентов 
+            {
+                result = 0; // успешная блокировка урона 
+            }
+            else
+            {
+                result = 1; // безуспешная блокировка урона 
+            }
+            return result;
+        }
+
+        int _damageEnemy(int _addBufDiplomation) // расчёт _multiplyBlockOur в зависимости от шансов (прокачанная дипломатия) 
+        {
+            int result = 0;
+            if (Random.Range(0, 101) >= _enemyBuffDiplomation + _addBufDiplomation) // выбираем рандомное значение от 0 до 100% с вероятностью выбора в _ourBuffDiplomation + _addBufDiplomation процентов 
+            {
+                result = 0; // успешная блокировка урона 
+            }
+            else
+            {
+                result = 1; // безуспешная блокировка урона 
+            }
+            return result;
+        }
+
+        if (_isOurAttack) // если мы ходим  
+        {
+            if (_idCard == "patronage")
+            {
+                if (_materialsCard == 1) _multiplyBlockOurMaterials = _damageOur(0);
+                else if (_economicCard == 1) _multiplyBlockOurEconomic = _damageOur(0);
+                else if (_healthCard == 1) _multiplyBlockOurHealth = _damageOur(0);
+                else if (_foodCard == 1) _multiplyBlockOurFood = _damageOur(0);
+            }
+            if (_idCard == "diplomaticImmunty")
+            {
+                if (_damageOur(0) == 1) // в patronage фактор не получает урон с верояностью _ourBuffDiplomation + _addBufDiplomation, а здесь наоборот, Вероятность снижена на _ourBuffDiplomation + _addBufDiplomation, поэтому "инвертируем" result 
+                {
+                    _multiplyBlockOurMaterials = 1;
+                    _multiplyBlockOurFood = 1;
+                }
+                else if (_damageOur(0) == 0)
+                {
+                    _multiplyBlockOurMaterials = 0;
+                    _multiplyBlockOurFood = 0; 
+                }
+            }
+            if (_idCard == "strategicLoan") // не проработал функционал, пока так 
+            {
+                _multiplyBlockOurEconomic = _damageOur(0);
+                _multiplyBlockOurHealth = _damageOur(0);
+            }
+            if (_idCard == "energyExpansion")
+            {
+                _multiplyBlockOurMaterials = _damageOur(40);
+                _multiplyBlockOurFood = _damageOur(40);
+            }
+        }
+        else // если враг ходит 
+        {
+            if (_idCard == "patronage")
+            {
+                if (_materialsCard == 1) _multiplyBlockEnemyMaterials = _damageEnemy(0);
+                else if (_economicCard == 1) _multiplyBlockEnemyEconomic = _damageEnemy(0);
+                else if (_healthCard == 1) _multiplyBlockEnemyHealth = _damageEnemy(0);
+                else if (_foodCard == 1) _multiplyBlockEnemyFood = _damageEnemy(0);
+            }
+            if (_idCard == "diplomaticImmunty")
+            {
+                if (_damageEnemy(0) == 1) // в patronage фактор не получает урон с верояностью _ourBuffDiplomation + _addBufDiplomation, а здесь наоборот, Вероятность снижена на _ourBuffDiplomation + _addBufDiplomation, поэтому "инвертируем" result 
+                {
+                    _multiplyBlockEnemyMaterials = 1;
+                    _multiplyBlockEnemyFood = 1;
+                }
+                else if (_damageEnemy(0) == 0)
+                {
+                    _multiplyBlockEnemyMaterials = 0;
+                    _multiplyBlockEnemyFood = 0;
+                }
+            }
+            if (_idCard == "strategicLoan") // не проработал функционал, пока так 
+            {
+                _multiplyBlockEnemyEconomic = _damageEnemy(0);
+                _multiplyBlockEnemyHealth = _damageEnemy(0);
+            }
+            if (_idCard == "energyExpansion")
+            {
+                _multiplyBlockEnemyMaterials = _damageEnemy(40);
+                _multiplyBlockEnemyFood = _damageEnemy(40);
+            }
+        }
+    }
+
+    void CalcDamageFortune(bool _isOurAttack)
+    {
+        int _fortuneDamage = 0;
+        if (_isOurAttack) // если мы атакуем 
+        {
+            if (_idCard == "harvest")
+            {
+                _fortuneDamage = 10 + _ourBuffFortune;
+            }
+            else if (_idCard == "elections")
+            {
+                _fortuneDamage = 10 + _ourBUFFhealth;
+            }
+            else if (_idCard == "techological")
+            {
+                _fortuneDamage = 10 + _ourBUFFfood; // решение не такое, но пока оставим 
+            }
+            else if (_idCard == "educationalInfrastructure")
+            {
+                _fortuneDamage = 10 + _ourBUFFmaterial; // решение не такое, но пока оставим
+            }
+            if (Random.Range(0, 101) >= _fortuneDamage) // выбираем рандомное значение от 0 до 100% с вероятностью выбора в _fortuneDamage процентов 
+            {
+                _totalMoralePresident = _totalMoralePresident + _deltamorale_positive;
+            }
+            else _totalMoralePresident = _totalMoralePresident + _deltamorale_negative;
+            //int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
+            //_ourBUFFhealth = _ourBUFFhealth + _randomDeltaMorale[Random.Range(0, 1)]; // если +, то суммируем, если -, то вычитаем 
+        }
+        else
+        {
+            if (_idCard == "harvest") _fortuneDamage = 10 + _enemyBuffFortune;
+            else if (_idCard == "elections") _fortuneDamage = 10 + _enemyBUFFhealth;
+            else if (_idCard == "techological") _fortuneDamage = 10 + _enemyBUFFfood; // решение не такое, но пока оставим 
+            else if (_idCard == "educationalInfrastructure") _fortuneDamage = 10 + _enemyBUFFmaterial; // решение не такое, но пока оставим
+          
+            if (Random.Range(0, 101) >= _fortuneDamage) // выбираем рандомное значение от 0 до 100% с вероятностью выбора в _fortuneDamage процентов 
+            {
+                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy + _deltamorale_positive;
+            }
+            else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy + _deltamorale_negative;
+        }
+    }
+
+        void CalcCoastFactors(bool _isOurAttack)
+    {
+
+        if (_isOurAttack) // если мы атакуем 
+        {
+            if (_materialsCard == 1) _ourBUFFmaterial = _ourBUFFmaterial - _costCard;
+            if (_economicCard == 1) _ourBUFFeconomic = _ourBUFFeconomic - _costCard;
+            if (_healthCard == 1) _ourBUFFhealth = _ourBUFFhealth - _costCard; 
+            if (_foodCard == 1) _ourBUFFfood = _ourBUFFfood - _costCard; 
+        }
+        else // если враг атакует 
+        {
+            if (_materialsCard == 1)
+            {
+                _enemyBUFFmaterial = _enemyBUFFmaterial - _costCard;
+                // _FactorMaterials.Find("Boom").gameObject.SetActive(true); // включили фейерверк 
+            }
+            if (_economicCard == 1)
+            { 
+                _enemyBUFFeconomic = _enemyBUFFeconomic - _costCard;
+                // _FactorEconomic.Find("Boom").gameObject.SetActive(true);
+            }
+            if (_healthCard == 1)
+            {
+                _enemyBUFFhealth = _enemyBUFFhealth - _costCard;
+                //_FactorHealth.Find("Boom").gameObject.SetActive(true);
+            }
+            if (_foodCard == 1)
+            {
+                _enemyBUFFfood = _enemyBUFFfood - _costCard;
+               // _FactorFood.Find("Boom").gameObject.SetActive(true);
+            }
+        }
     }
 
     void CalcEnemyFight2() // расчёт очков от хода соперника 
     {
-        _OtherMatBoom.CopyPropertiesFromMaterial(_redBoom); // меняем цвета у частиц 
-        _redBoom.CopyPropertiesFromMaterial(_greenBoom);
-        _greenBoom.CopyPropertiesFromMaterial(_OtherMatBoom); 
-
-        Debug.Log("_enemyBUFFmaterial After ENEMY" + _enemyBUFFmaterial);
         if (_attackCard == 1) 
         {
-            if (_materialsCard == 1)
-            {
-                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                _ourBUFFmaterial = _ourBUFFmaterial - _deltamorale_positive;
-                _FactorMaterials.Find("Boom").gameObject.SetActive(true); // включили фейерверк 
-                
-            }
-            else if (_economicCard == 1)
-            {
-                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                _ourBUFFeconomic = _ourBUFFeconomic - _deltamorale_positive;
-                _FactorEconomic.Find("Boom").gameObject.SetActive(true);
-            }
-            else if (_healthCard == 1)
-            {
-                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                _ourBUFFhealth = _ourBUFFhealth - _deltamorale_positive;
-                _FactorHealth.Find("Boom").gameObject.SetActive(true);
-            }
-            else if (_foodCard == 1)
-            {
-                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                _ourBUFFfood = _ourBUFFfood - _deltamorale_positive;
-                _FactorFood.Find("Boom").gameObject.SetActive(true);
-            }
-            else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard; // на всякий, случиться не должно 
+            _MaterialBoom.CopyPropertiesFromMaterial(_redBoom); // меняем цвета у частиц на красный
+            CalcDamageAtack(false); // считаем урон Атаки  
+            CalcCoastFactors(false); // пересчитываем факторы исходя из цены 
         }
         else
         {
             if (_protectCard == 1)
             {
-                if (_materialsCard == 1)
-                {
-                    _enemyBUFFmaterial = _enemyBUFFmaterial - _deltamorale_negative;
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                    _FactorMaterialsEnemy.Find("Boom").gameObject.SetActive(true);
-                }
-                else if (_economicCard == 1)
-                {
-                    _enemyBUFFeconomic = _enemyBUFFeconomic - _deltamorale_negative;
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                    _FactorEconomicEnemy.Find("Boom").gameObject.SetActive(true);
-                }
-                else if (_healthCard == 1)
-                {
-                    _enemyBUFFhealth = _enemyBUFFhealth - _deltamorale_negative;
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                    _FactorHealthEnemy.Find("Boom").gameObject.SetActive(true); 
-                }
-                else if (_foodCard == 1)
-                {
-                    _enemyBUFFfood = _enemyBUFFfood - _deltamorale_negative; 
-                    _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                    _FactorFoodEnemy.Find("Boom").gameObject.SetActive(true);
-                }
-                else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard; // на всякий, случиться не должно 
+                _MaterialBoom.CopyPropertiesFromMaterial(_greenBoom); // меняем цвета у частиц на красный
+                CalcDamageProtect(false);
+                CalcCoastFactors(false); // пересчитываем факторы исходя из цены 
             }
             else
             {
                 if (_diplomationCard == 1) // по дипломатии пока нет функционала 
                 {
-                    if (_materialsCard == 1)
-                    {
-                        _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                        _FactorMaterials.Find("Boom").gameObject.SetActive(true);
-                    }
-                    else if (_economicCard == 1)
-                    {
-                        _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                        _FactorEconomic.Find("Boom").gameObject.SetActive(true);
-                    }
-                    else if (_healthCard == 1)
-                    {
-                        _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                        _FactorHealth.Find("Boom").gameObject.SetActive(true); 
-                    }
-                    else if (_foodCard == 1)
-                    {
-                        _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                        _FactorFood.Find("Boom").gameObject.SetActive(true);
-                    }
-                    else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard; // на всякий, случиться не должно 
+                    _MaterialBoom.CopyPropertiesFromMaterial(_redBoom); // меняем цвета у частиц на красный 
+                    CalcDamageDiplomation(false);
+                    CalcCoastFactors(false); // пересчитываем факторы исходя из цены 
                 }
                 else
                 {
                     if (_fortuneCard == 1)
                     {
-                        if (_materialsCard == 1)
-                        {
-                            int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                            _enemyBUFFmaterial = _enemyBUFFmaterial + _randomDeltaMorale[Random.Range(0, 1)];
-                            _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                            _FactorMaterialsEnemy.Find("Boom").gameObject.SetActive(true);
-                        }
-                        else if (_economicCard == 1)
-                        {
-                            int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                            _enemyBUFFeconomic = _enemyBUFFeconomic + _randomDeltaMorale[Random.Range(0, 1)];
-                            _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                            _FactorEconomicEnemy.Find("Boom").gameObject.SetActive(true);
-                        }
-                        else if (_healthCard == 1)
-                        {
-                            int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                            _enemyBUFFhealth = _enemyBUFFhealth + _randomDeltaMorale[Random.Range(0, 1)];
-                            _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                            _FactorHealthEnemy.Find("Boom").gameObject.SetActive(true);
-                        } 
-                        else if (_foodCard == 1)
-                        {
-                            int[] _randomDeltaMorale = { _deltamorale_positive, _deltamorale_negative };
-                            _enemyBUFFfood = _enemyBUFFfood + _randomDeltaMorale[Random.Range(0, 1)];
-                            _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard;
-                            _FactorFoodEnemy.Find("Boom").gameObject.SetActive(true);
-                        }
-                        else _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _costCard; // на всякий, случиться не должно 
+                        _MaterialBoom.CopyPropertiesFromMaterial(_greenBoom); // меняем цвета у частиц на красный 
+                        CalcDamageFortune(false);
+                        CalcCoastFactors(false); // пересчитываем факторы исходя из цены 
                     }
                 }
             }
         }
 
-        if (_enemyBUFFmaterial < 0) _enemyBUFFmaterial = 0; // очки факторов не могут быть отрицательными 
-        if (_enemyBUFFeconomic < 0) _enemyBUFFeconomic = 0;
-        if (_enemyBUFFhealth < 0) _enemyBUFFhealth = 0;
-        if (_enemyBUFFfood < 0) _enemyBUFFfood = 0;
+        _dragFactor.Find("Boom").gameObject.SetActive(true); // включили фейерверк от вражеского хода 
+        Debug.Log("_dragFactor = " + _dragFactor.name); 
 
         _hitLast = _FightCardOnTable[counter_card]; // записали, что в этом ходу была выбрана такая-то карта 
         ReadyFight2(); // вывод на экран расчётов 
@@ -902,32 +1055,40 @@ public class FightRules : MonoBehaviour
         StartCoroutine(Pause3()); 
     }
 
-    IEnumerator Pause3()
+    IEnumerator Pause3() // пауза анимации фейерверка 
     {
         yield return new WaitForSeconds(2);
-        _FactorMaterials.Find("Boom").gameObject.SetActive(false); // Выключили фейерверки у врага, пока так топорно, с дорогим Find
-        _FactorEconomic.Find("Boom").gameObject.SetActive(false);
-        _FactorHealth.Find("Boom").gameObject.SetActive(false);
-        _FactorFood.Find("Boom").gameObject.SetActive(false);
-        _FactorMaterialsEnemy.Find("Boom").gameObject.SetActive(false);
-        _FactorEconomicEnemy.Find("Boom").gameObject.SetActive(false);
-        _FactorHealthEnemy.Find("Boom").gameObject.SetActive(false);
-        _FactorFoodEnemy.Find("Boom").gameObject.SetActive(false);
-
-        _OtherMatBoom.CopyPropertiesFromMaterial(_redBoom); // меняем цвета у частиц обратно 
-        _redBoom.CopyPropertiesFromMaterial(_greenBoom);
-        _greenBoom.CopyPropertiesFromMaterial(_OtherMatBoom);
+        _dragFactor.Find("Boom").gameObject.SetActive(false); // выключили фейерверк 
 
         Cursor.lockState = CursorLockMode.None; // включаем курсор только после хода соперника 
         _helperMain = true; // возвращаем хелперы в рабочее состояние 
-        _helper = true; 
+        _helper = true;
+
+        Reset_multiplyBlock(true); // обнуляем эффект от карты Защиты на наши факторы после хода соперника 
     }
     
+    void Reset_multiplyBlock(bool _isOurAttack)
+    {
+        if (_isOurAttack)
+        {
+            _multiplyBlockOurEconomic = 1;
+            _multiplyBlockOurMaterials = 1;
+            _multiplyBlockOurFood = 1;
+            _multiplyBlockOurHealth = 1;
+        }
+        else
+        {
+            _multiplyBlockEnemyEconomic = 1;
+            _multiplyBlockEnemyMaterials = 1;
+            _multiplyBlockEnemyFood = 1;
+            _multiplyBlockEnemyHealth = 1;
+        }
+    }
+
 
 public void ReadyFight() // рассчитывается 1 раз в начале при нажатии кнопки "Ready" 
     {
-        calcLocationFactorsOur();
-        calcLocationFactorsEnemy();
+        calcLocationFactors();
 
         for (int i = 0; i < 3; i++) // считаем мораль 
         {
@@ -944,6 +1105,15 @@ public void ReadyFight() // рассчитывается 1 раз в начал�
         _canvasCamera.transform.Find("Text_TotalMorale").GetComponent<Text>().text = "You morale " + _totalMoralePresident; // наша мораль 
         _canvasCamera.transform.Find("Text_TotalMoraleEnemy").GetComponent<Text>().text = "Enemy morale " + _totalMoralePresidentEnemy; // мораль противника 
 
+        if (_ourBUFFmaterial < 0) _ourBUFFmaterial = 0; // очки факторов не могут быть отрицательными 
+        if (_ourBUFFeconomic < 0) _ourBUFFeconomic = 0;
+        if (_ourBUFFhealth < 0) _ourBUFFhealth = 0;
+        if (_ourBUFFfood < 0) _ourBUFFfood = 0;
+        if (_enemyBUFFmaterial < 0) _enemyBUFFmaterial = 0; // очки факторов не могут быть отрицательными 
+        if (_enemyBUFFeconomic < 0) _enemyBUFFeconomic = 0;
+        if (_enemyBUFFhealth < 0) _enemyBUFFhealth = 0;
+        if (_enemyBUFFfood < 0) _enemyBUFFfood = 0;
+
         _PlaceFactor[0].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFmaterial; // ХП Сырья 
         _PlaceFactor[1].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFfood; // ХП продовольствия
         _PlaceFactor[2].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFeconomic; // хп экономики
@@ -953,29 +1123,38 @@ public void ReadyFight() // рассчитывается 1 раз в начал�
         _PlaceFactorEnemy[2].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFeconomic; // хп экономики
         _PlaceFactorEnemy[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFhealth; // хп здравоохранения 
 
-        if (_totalMoralePresidentEnemy <= 0) // если враг проиграл
+        // if (_totalMoralePresidentEnemy <= 0) // если враг проиграл
+        if (_enemyBUFFmaterial + _enemyBUFFeconomic + _enemyBUFFhealth + _enemyBUFFfood <= 0) // если враг проиграл
         {
-            Cursor.lockState = CursorLockMode.None; // включаем курсор 
             DataHolder._winnerHolder = true;
             DataHolder._moralePresidentHolder = _totalMoralePresident;
-            SceneManager.LoadScene(3);
-            SaveTXT();
-        }
-        else
-            if (_totalMoralePresident <= 0) // если мы проиграли 
-        {
+            StartCoroutine(Pause4());
             Cursor.lockState = CursorLockMode.None; // включаем курсор 
+            //SaveTXT();
+        }
+        else if (_ourBUFFmaterial + _ourBUFFeconomic + _ourBUFFhealth + _enemyBUFFfood <= 0)//(_totalMoralePresident <= 0) // если мы проиграли 
+        {
             DataHolder._winnerHolder = false;
-            SceneManager.LoadScene(3);
-            SaveTXT();
+            StartCoroutine(Pause4());
+            Cursor.lockState = CursorLockMode.None; // включаем курсор 
+            //SaveTXT();
         }
 
-        _testText = "\n OurMorale " + _totalMoralePresident + "\n MoraleEnemy " + _totalMoralePresidentEnemy + "\n" + _testText; // вывод данных 
-        _scrollViewContent.transform.GetComponent<Text>().text = _testText;
+        _testText2 = "\n OurMorale " + _totalMoralePresident + "\n" + " MoraleEnemy " + _totalMoralePresidentEnemy + "\n" + _testText2; // вывод данных 
+
+        _scrollViewContent1.transform.GetComponent<Text>().text = _testText1;
+        _scrollViewContent2.transform.GetComponent<Text>().text = _testText2;
+        SaveTXT();
+    }
+
+    IEnumerator Pause4() // пауза перед завершением 
+    {
+        yield return new WaitForSeconds(2.5f);
+        SceneManager.LoadScene(3);
     }
     void SaveTXT() // пишем Лог 
     {
-        string path = Application.streamingAssetsPath + "/" + "log.txt";
-        File.WriteAllText(path, _testText);
+        File.WriteAllText(path, ""); // очистили файл 
+        File.WriteAllText(path, _testText2); // записали в лог 
     }
 }
