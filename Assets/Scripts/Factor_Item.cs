@@ -205,7 +205,7 @@ public class Factor_Item : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     void Materials(int j)
     {
-        _mainHeader = "Сырье";
+        _mainHeader = "Raw material";
         _descriptionFactor = "" + _factor_materials; //задали в текстовом описание Abilities
         _enterFactor = "Materials"; // если дошли по условиям до данной строчки, значит, фактор, который накинул игрок при перетаскивании - Материалы 
         _materials_ability_protect = myItemList.player[j].materials_ability_protect;
@@ -219,7 +219,7 @@ public class Factor_Item : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     void Economic(int j)
     {
         //texts[0].text = "Экономика";
-        _mainHeader = "Экономика";
+        _mainHeader = "Economic";
         //texts[1].text = _factor_economic;
         _descriptionFactor = _factor_economic;
         _enterFactor = "Economic"; // на какую сферу влияет 
@@ -235,7 +235,7 @@ public class Factor_Item : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
 
         //texts[0].text = "Здравоохранение";
-        _mainHeader = "Здравоохранение";
+        _mainHeader = "Healthcare";
         //texts[1].text = _factor_health;
         _descriptionFactor = _factor_health;
         _enterFactor = "Health"; // на какую сферу влияет
@@ -250,7 +250,7 @@ public class Factor_Item : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     void Food(int j)
     {
         //texts[0].text = "Продовольствие";
-        _mainHeader = "Продовольствие";
+        _mainHeader = "Food";
         _descriptionFactor = _factor_food;
         _enterFactor = "Food"; // на какую сферу влияет 
         _materials_ability_protect = 0;

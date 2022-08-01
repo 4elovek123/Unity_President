@@ -1,27 +1,11 @@
 
- OurMorale 170
- MoraleEnemy 132
- The opponent used the card airStrike to Health
-
- OurMorale 170
- MoraleEnemy 133
- We used the card energyExpansion to Health
-
- OurMorale 174
- MoraleEnemy 133
- The opponent used the card educationalInfrastructure to Economic
-
- OurMorale 174
- MoraleEnemy 132
- We used the card elections to Food
-
  OurMorale 166
- MoraleEnemy 132
- The opponent used the card accession to Health
+ MoraleEnemy 154
+ The opponent used the card elections to Health
 
  OurMorale 166
  MoraleEnemy 146
- We used the card airStrike to Material
+ We used the card airStrike to Economic
 
  OurMorale 167
  MoraleEnemy 146
