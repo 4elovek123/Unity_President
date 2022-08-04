@@ -1,11 +1,11 @@
 
- OurMorale 166
- MoraleEnemy 154
- The opponent used the card elections to Health
+ OurMorale 175
+ MoraleEnemy 134
+ The opponent used the card accession to Health
 
- OurMorale 166
+ OurMorale 175
  MoraleEnemy 146
- We used the card airStrike to Economic
+ We used the card elections to Health
 
  OurMorale 167
  MoraleEnemy 146

@@ -7,8 +7,12 @@ using System.IO;
 
 public class FightRules : MonoBehaviour
 {
+    Transform _GO1 = null;
+    Transform _GO2 = null; 
+
     public Transform _Table;
     public GameObject _Arrow;
+    private bool _deactivateArrow = false;
 
     public Factor_Item[] _FactorItemPresident = new Factor_Item[3];
     public Factor_Item[] _FactorItemPresidentEnemy = new Factor_Item[3];
@@ -109,7 +113,10 @@ public class FightRules : MonoBehaviour
 
     public Material _redBoom;
     public Material _greenBoom;
-    public Material _MaterialBoom; 
+    public Material _MaterialBoom;
+    public Material _redArrow;
+    public Material _greenArrow; 
+    public Material _MaterialArrow;
 
     private int _multiplyBlockOurEconomic = 1; // множители для эффекта от карт защит. Если 1, то никакого действия не оказывает. Если 0, то блокируется урон при подсчёте 
     private int _multiplyBlockOurMaterials = 1;
@@ -166,6 +173,8 @@ public class FightRules : MonoBehaviour
             _FightCardInScene[i] = Folder_FightCardInScene.transform.GetChild(i).transform; // занесли их в массив _FightCardInScene[]
         }
 
+
+
         _FightCardPlace = new Transform[Folder_FightCardPlace.transform.childCount];
         _FightCardOnTable = new Transform[_FightCardPlace.Length];
 
@@ -201,12 +210,13 @@ public class FightRules : MonoBehaviour
             {
                 if (_FightCardOnTable[i].name == myItemListCard.fight_card[j].id) // нашли совпадения с картой из JSON 
                 {
-                    _FightCardOnTable[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentInChildren<Text>().text = "" + myItemListCard.fight_card[j].cost; // прописали цену для каждой карты за столом 
+                    _FightCardOnTable[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_Cost").GetComponent<Text>().text = "" + myItemListCard.fight_card[j].cost; // прописали цену для каждой карты за столом 
+                    TextForCard(_FightCardOnTable[i]); // записали текст описания в карточки 
                 }
             }
         }
-
         StartAnimation();
+
     }
 
     public void StartButton() // выставляем карты президентов 
@@ -274,7 +284,8 @@ public class FightRules : MonoBehaviour
             _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[1].color = _FactorItemPresidentEnemy[i].ImageBuf[1].GetComponent<Image>().color;
             _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[2].color = _FactorItemPresidentEnemy[i].ImageBuf[2].GetComponent<Image>().color;
             _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[3].color = _FactorItemPresidentEnemy[i].ImageBuf[3].GetComponent<Image>().color;
-        }
+        } 
+
         ReadyFight();
         ReadyFight2();
 
@@ -286,49 +297,49 @@ public class FightRules : MonoBehaviour
         _FactorMaterials.transform.SetParent(_PlaceFactor[0]);
         _FactorMaterials.transform.localPosition = Vector3.zero;
         _FactorMaterials.transform.localRotation = Quaternion.identity;
-        _FactorMaterials.transform.localScale = new Vector3(1f, 1f, 1f);
+        _FactorMaterials.transform.localScale = Vector3.one;
         _PlaceFactor[0].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFmaterial; // ХП Сырья
 
         _FactorFood.transform.SetParent(_PlaceFactor[1]);
         _FactorFood.transform.localPosition = Vector3.zero;
         _FactorFood.transform.localRotation = Quaternion.identity;
-        _FactorFood.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+        _FactorFood.transform.localScale = Vector3.one;
         _PlaceFactor[1].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFfood; // хп продовольствия
 
         _FactorEconomic.transform.SetParent(_PlaceFactor[2]);
         _FactorEconomic.transform.localPosition = Vector3.zero;
         _FactorEconomic.transform.localRotation = Quaternion.identity;
-        _FactorEconomic.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+        _FactorEconomic.transform.localScale = Vector3.one;
         _PlaceFactor[2].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFeconomic; // ХП экономики
 
         _FactorHealth.transform.SetParent(_PlaceFactor[3]);
         _FactorHealth.transform.localPosition = Vector3.zero;
         _FactorHealth.transform.localRotation = Quaternion.identity;
-        _FactorHealth.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+        _FactorHealth.transform.localScale = Vector3.one;
         _PlaceFactor[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _ourBUFFhealth; // хп здравоохранения 
 
         _FactorMaterialsEnemy.transform.SetParent(_PlaceFactorEnemy[0]);
         _FactorMaterialsEnemy.transform.localPosition = Vector3.zero;
         _FactorMaterialsEnemy.transform.localRotation = Quaternion.identity;
-        _FactorMaterialsEnemy.transform.localScale = new Vector3(1f, 1f, 1f);
+        _FactorMaterialsEnemy.transform.localScale = Vector3.one;
         _PlaceFactorEnemy[0].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFmaterial; // ХП Сырья 
 
         _FactorFoodEnemy.transform.SetParent(_PlaceFactorEnemy[1]);
         _FactorFoodEnemy.transform.localPosition = Vector3.zero;
         _FactorFoodEnemy.transform.localRotation = Quaternion.identity;
-        _FactorFoodEnemy.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+        _FactorFoodEnemy.transform.localScale = Vector3.one;
         _PlaceFactorEnemy[1].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFfood; // хп продовольствия
 
         _FactorEconomicEnemy.transform.SetParent(_PlaceFactorEnemy[2]);
         _FactorEconomicEnemy.transform.localPosition = Vector3.zero;
         _FactorEconomicEnemy.transform.localRotation = Quaternion.identity;
-        _FactorEconomicEnemy.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+        _FactorEconomicEnemy.transform.localScale = Vector3.one;
         _PlaceFactorEnemy[2].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFeconomic; // хп экономики
 
         _FactorHealthEnemy.transform.SetParent(_PlaceFactorEnemy[3]);
         _FactorHealthEnemy.transform.localPosition = Vector3.zero;
         _FactorHealthEnemy.transform.localRotation = Quaternion.identity;
-        _FactorHealthEnemy.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+        _FactorHealthEnemy.transform.localScale = Vector3.one;
         _PlaceFactorEnemy[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFhealth; // хп здравоохранения 
 
         }
@@ -382,59 +393,121 @@ public class FightRules : MonoBehaviour
         {
             _helper = false;
             _helperMain = false; // выключаем, чтобы не обрабатывать 1 этап (рейкаст и тп при наведении мышки на боевые карты) 
-
-            if (_hitLast != null)
-            {
-                _hitLast.transform.localRotation = Quaternion.identity; // и перевернули закрытую карту рубашкой обратно 
-            }
-
             AnimationTransformCard(_FightCardOnTable[counter_card]); // анимация вылета выбранной карты на середину колоды 
-
         }
 
         if (_boolOutlineToFactor == true) // рейкаст по нужным факторам, когда нажали на боевую карту 
         {
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 1));
-            RaycastHit _hit;
-            if (Physics.Raycast(ray, out _hit, Mathf.Infinity) && _hit.collider.tag == "Factors") // рейкаст, вычисляем наведение мышки на фактор 
+            // если мышка выше линии, то продолжаем выбирать факторы
+            // если ниже - сбрасываем всё обратно 
+            if (Input.mousePosition.y < Screen.height / 6) // если ниже 1/6 высоты экрана и не выделяется карта - сбрасываем всё обратно 
             {
-                if (_attackCard == 1 || _diplomationCard == 1) // атака и дипломатия ориентированы на факторы противника 
-                {
-                    if (Input.GetMouseButtonDown(0)) 
-                    {
-                        if (_hit.transform.name == "Enemy_Materials" && _enemyBUFFmaterial > 0 || // условие, что только при положительном ХП факторов будет реакция на нажатие 
-                            _hit.transform.name == "Enemy_Food" && _enemyBUFFfood > 0 ||
-                            _hit.transform.name == "Enemy_Economic" && _enemyBUFFeconomic > 0 ||
-                            _hit.transform.name == "Enemy_Health" && _enemyBUFFhealth > 0)
-                        {
-                            _boolOutlineToFactor = false; // выключили обработку в Update 
-                            _dragFactor = _hit.transform; // узнали, какой фактор выбрали 
-                            AnimationArrow(_dragFactor); // вызываем анимацию стрелки 
-                        }
-                    }
-                }
-
-                else if (_protectCard == 1 || _fortuneCard == 1)
-                {
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        if (_hit.transform.name == "Our_Materials" && _ourBUFFmaterial > 0 || // условие, что только при положительном ХП факторов будет реакция на нажатие 
-                            _hit.transform.name == "Our_Food" && _ourBUFFfood > 0 ||
-                            _hit.transform.name == "Our_Economic" && _ourBUFFeconomic > 0 ||
-                            _hit.transform.name == "Our_Health" && _ourBUFFhealth > 0)
-                        //   if (_hit.transform.name == _PlaceFactor[k].name && Input.GetMouseButtonDown(0)) // если мы нажали на нужный фактор 
-                        {
-                            _boolOutlineToFactor = false; // выключили обработку в Update 
-                            _dragFactor = _hit.transform; // узнали, какой фактор выбрали 
-                            AnimationArrow(_dragFactor); // вызываем анимацию стрелки 
-                        }
-                    }
-                }
+                _boolOutlineToFactor = false;
+                ResetFightCard();
+                StopAnimationFactors(); // остановили все логотипы 
+                _helperMain = true;
+                ResetAnimationArrow(); // Здесь Reset работает, не в Update - нет 
             }
             else
             {
-                _dragFactor = null;
+                RaycastFactors();
+                AnimationArrow(); 
             }
+        }
+
+        if (_deactivateArrow)
+        {
+            ResetAnimationArrow();
+            _deactivateArrow = false; 
+        }
+    }
+
+    void AnimationArrow() // растягивающаяся стрелка 
+    {
+        // _deactivateArrow = false;
+        //_Arrow.GetComponentInChildren<MeshRenderer>().enabled = true;
+        _Arrow.SetActive(true); // включили стрелку 
+
+        // задаём поворот стрелки в зависимости от положения указателя 
+        Vector3 Mouse = Input.mousePosition; // координаты мыши на экране 
+        Mouse.z = Vector3.Distance(_camera.transform.position, _PlaceFactor[0].transform.position); // взяли z стола, отсчет от нуля камеры 
+        Vector3 target = _camera.ScreenToWorldPoint(Mouse); // координаты мыши мировые 
+        _Arrow.transform.LookAt(target); // следим за таргетом
+        _Arrow.transform.rotation = Quaternion.Euler(_Arrow.transform.rotation.eulerAngles.x, _Arrow.transform.rotation.eulerAngles.y, 0); 
+
+        float _scaleArrowZ = Vector3.Distance(target, _Arrow.transform.position);
+        _Arrow.transform.localScale = new Vector3(_scaleArrowZ, _scaleArrowZ, 2.5f * _scaleArrowZ); // растягиваем стрелку 
+    }
+
+    void RaycastFactors()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 1));
+        RaycastHit _hit;
+        _GO2 = _GO1; // _GO2 - выбранный в предыдущий момент фактор
+
+        if (Physics.Raycast(ray, out _hit, Mathf.Infinity) && _hit.collider.tag == "Factors") // рейкаст, вычисляем наведение мышки на фактор 
+        {
+            _GO1 = _hit.transform; // выбранный на данный момент фактор
+            if (_attackCard == 1 || _diplomationCard == 1) // атака и дипломатия ориентированы на факторы противника 
+            {
+                if (_hit.transform.name == "Enemy_Materials" && _enemyBUFFmaterial > 0 || // условие, что только при положительном ХП факторов будет реакция на нажатие 
+                    _hit.transform.name == "Enemy_Food" && _enemyBUFFfood > 0 ||
+                    _hit.transform.name == "Enemy_Economic" && _enemyBUFFeconomic > 0 ||
+                    _hit.transform.name == "Enemy_Health" && _enemyBUFFhealth > 0)
+                {
+                    //_MaterialArrow.CopyPropertiesFromMaterial(_redArrow); // меняем цвета у стрелки на красный 
+                    ResizeAndClick();
+                }
+            }
+            else if (_protectCard == 1 || _fortuneCard == 1)
+            {
+                if (_hit.transform.name == "Our_Materials" && _ourBUFFmaterial > 0 || // условие, что только при положительном ХП факторов будет реакция на нажатие 
+                    _hit.transform.name == "Our_Food" && _ourBUFFfood > 0 ||
+                    _hit.transform.name == "Our_Economic" && _ourBUFFeconomic > 0 ||
+                    _hit.transform.name == "Our_Health" && _ourBUFFhealth > 0)
+                {
+                    //_MaterialArrow.CopyPropertiesFromMaterial(_greenArrow); // меняем цвета у стрелки на зеленый 
+                    ResizeAndClick();
+                }
+            }
+
+            void ResizeAndClick()
+            {
+                if (_GO2 != _GO1 && _GO2 != null)
+                {
+                    _GO2.transform.localScale = Vector3.one; // если сменили фактор (перескочили с одного на другой), то предыдущий сбрасываем 
+                    _GO2 = null; 
+                }
+                _GO1.transform.localScale = new Vector3(1.25f, 1.25f, 1.25f); // а текущий по-любому выделяем 
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    _boolOutlineToFactor = false; // выключили обработку в Update 
+                    _dragFactor = _hit.transform; // узнали, какой фактор выбрали 
+                    AnimationArrowReaction(); // вызываем дальнейший код 
+
+                    if (_hitLast != null)
+                    {
+                        _hitLast.transform.localRotation = Quaternion.identity; // и перевернули закрытую карту рубашкой обратно 
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (_GO1 != null)
+            {
+                _GO1.transform.localScale = Vector3.one;
+                _GO1 = null;
+            }
+
+            if (_GO2 != null) // на всякий случай 
+            {
+                _GO2.transform.localScale = Vector3.one;
+                _GO2 = null;
+            } 
+
+            _dragFactor = null;
         }
     }
 
@@ -463,8 +536,7 @@ public class FightRules : MonoBehaviour
 
     void AnimationScaleCardOpen(Transform _y) // анимация размера боевой карты, которая проигрывается при наведении мыши 
     {
-        _FirstSelectionFightCard = _y;
-
+        _FirstSelectionFightCard = _y; 
         _y.localPosition = new Vector3(_y.localPosition.x, 0.05f, _y.localPosition.z); // если использовать ротатор для смещения карты на нас (чтобы избежать Z файтинга, когда карта увеличивается), получается глюк, когда карта из раза в раз постепенно смещается от 0,0,0. Поэтому задаем смещение карты на себя без анимации, "железно" 
 
         Animator animatorOpen = _y.transform.GetComponent<Animator>();
@@ -487,7 +559,8 @@ public class FightRules : MonoBehaviour
     void AnimationTransformCard(Transform _y) // анимация вылета боевой карты на центр, которая проигрывается при нажатии кнопк мыши, и других 
     {
         _y.transform.position = new Vector3(_camera.ViewportToWorldPoint(new Vector3(.5f, .5f, 0)).x, _y.transform.position.y, _y.transform.position.z); // карта на центр колоды 
-        _helper101 = false;
+        _helper101 = false; 
+
         // включаем анимацию логотипов у нужных факторов 
         if (_attackCard == 1 || _diplomationCard == 1) // атака и дипломатия ориентированы на факторы противника 
         {
@@ -499,6 +572,7 @@ public class FightRules : MonoBehaviour
                     _PlaceFactorEnemy[i].name == "Enemy_Health" && _enemyBUFFhealth > 0)
                 { 
                     AnimationFactors(_PlaceFactorEnemy[i]); // запускаем анимацию всех логотипов, предлагая игроку выбрать фактор 
+                    _MaterialArrow.CopyPropertiesFromMaterial(_redArrow); // меняем цвета у стрелки на красный 
                 }
             }
         }
@@ -514,6 +588,7 @@ public class FightRules : MonoBehaviour
                 
                 {
                     AnimationFactors(_PlaceFactor[i]); // запускаем анимацию всех логотипов, предлагая игроку выбрать фактор 
+                    _MaterialArrow.CopyPropertiesFromMaterial(_greenArrow); // меняем цвета у стрелки на зеленый  
                 }
             }
         }
@@ -527,54 +602,12 @@ public class FightRules : MonoBehaviour
         _boolOutlineToFactor = true; // отмечаем, что прошли этап, в Update нужно рейкастить фактор, по которому щелкнем мышью
     }
 
-    void AnimationArrow(Transform _dragFactorForArrow) // вычисляем, по какому фактору нужна анимация стрелки 
+    void AnimationArrowReaction() 
     {
-        Cursor.lockState = CursorLockMode.Locked; // отключаем курсор 
-        _Arrow.SetActive(true); // включаем стрелку 
-
-        Animator _arrowanim = _Arrow.transform.GetComponent<Animator>(); // достали аниматор стрелки 
-
-        if (_dragFactorForArrow.name == "Our_Materials")
-        {
-            _arrowanim.SetInteger("_selectArrow", 1); // в зависимости от фактора, запускаем анимацию стрелки 
-        }
-        if (_dragFactorForArrow.name == "Our_Food")
-        {
-            _arrowanim.SetInteger("_selectArrow", 2);
-        }
-        if (_dragFactorForArrow.name == "Our_Economic")
-        {
-            _arrowanim.SetInteger("_selectArrow", 3);
-        }
-        if (_dragFactorForArrow.name == "Our_Health")
-        {
-            _arrowanim.SetInteger("_selectArrow", 4);
-        }
-        if (_dragFactorForArrow.name == "Enemy_Materials")
-        {
-            _arrowanim.SetInteger("_selectArrow", 5);
-        }
-        if (_dragFactorForArrow.name == "Enemy_Food")
-        {
-            _arrowanim.SetInteger("_selectArrow", 6);
-        }
-        if (_dragFactorForArrow.name == "Enemy_Economic")
-        {
-            _arrowanim.SetInteger("_selectArrow", 7);
-        }
-        if (_dragFactorForArrow.name == "Enemy_Health")
-        {
-            _arrowanim.SetInteger("_selectArrow", 8);
-        }
-        StartCoroutine(Pause()); // вызываем паузу для прохождения анимации стрелки 
-    }
-
-    IEnumerator Pause() // пауза анимации стрелки
-    {
-        yield return new WaitForSeconds(1.25f); // пока так, в секундах. Через 2 сек закончилась анимация стрелки 
         StopAnimationFactors(); // остановили все логотипы 
-        _Arrow.SetActive(false); // выключили стрелку 
+        _deactivateArrow = true; // выключили стрелку. Я хз, почему не работает SetActive. Пока так, в Update  
 
+        Cursor.lockState = CursorLockMode.Locked; // отключаем курсор 
         if (_attackCard == 1 || _diplomationCard == 1) // если атака или диломатия
         {
             _MaterialBoom.CopyPropertiesFromMaterial(_redBoom); // меняем цвета у частиц на красный 
@@ -586,6 +619,13 @@ public class FightRules : MonoBehaviour
 
         _dragFactor.Find("Boom").gameObject.SetActive(true); // включили фейерверк 
         StartCoroutine(Pause2());
+    }
+
+    void ResetAnimationArrow() // сброс стрелки 
+    {
+        _Arrow.transform.rotation = Quaternion.identity;
+        _Arrow.transform.localScale = Vector3.one;
+        _Arrow.SetActive(false); // выключили стрелку 
     }
 
     void StopAnimationFactors() // пока так топорно и с Find останавливаем анимацию Лого, потом убрать 
@@ -602,18 +642,24 @@ public class FightRules : MonoBehaviour
 
     IEnumerator Pause2() // пауза анимации нашего фейерверка 
     {
+
         yield return new WaitForSeconds(1); // пока так, в секундах. Через 1 сек закончилась анимация взрыва 
         ResetAnimationCard();
     }
 
-    void ResetAnimationCard()
-    { 
-        _dragFactor.Find("Boom").gameObject.SetActive(false); // выключили фейерверк 
-
+    void ResetFightCard()
+    {
         AnimationScaleCardClose(_FightCardOnTable[counter_card]); // сбросили анимацию карты 
         _FightCardOnTable[counter_card].transform.localPosition = Vector3.zero; // вернули карту на место 
-        //_FightCardOnTable[counter_card].transform.Rotate(180, 180, 0); // и перевернули рубашкой вверх 
-        _FightCardOnTable[counter_card].transform.localEulerAngles = new Vector3(0, 0, 180); // и перевернули рубашкой вверх 
+    }
+    void ResetAnimationCard()
+    {
+        _GO1.transform.localScale = Vector3.one; // сбросили выделенный фактор 
+        _GO1 = null;
+
+        _dragFactor.Find("Boom").gameObject.SetActive(false); // выключили фейерверк 
+        ResetFightCard();
+        _FightCardOnTable[counter_card].transform.localEulerAngles = new Vector3(0, 0, 180); // и перевернули карту рубашкой вверх 
         CalcOurFight(); // вызываем расчёт очков в бою 
     }
 
@@ -724,18 +770,43 @@ public class FightRules : MonoBehaviour
     {
         void calcDamage(int _damage)
         {
-            if (_dragFactor.name == "Enemy_Materials")
+            if (_dragFactor.name == "Enemy_Materials") 
             {
-                _enemyBUFFmaterial = _enemyBUFFmaterial - _damage * _multiplyBlockEnemyMaterials; // Множители для эффекта от карт защит. Если 1, то никакого действия не оказывает. Если 0, то блокируется урон от атаки при подсчёте 
+                _enemyBUFFmaterial = _enemyBUFFmaterial - _damage*_multiplyBlockEnemyMaterials - _costCard; // Множители для эффекта от карт защит. Если 1, то никакого действия не оказывает. Если 0, то блокируется урон от атаки при подсчёте 
+                //_totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _damage*_multiplyBlockEnemyMaterials -_costCard; // вычитаем цену карты из морали (это урон врагу), потому что подсчёт (связка с Факторами) делается только на старте 
             }
-            if (_dragFactor.name == "Enemy_Economic") _enemyBUFFeconomic = _enemyBUFFeconomic - _damage * _multiplyBlockEnemyEconomic; 
-            if (_dragFactor.name == "Enemy_Health") _enemyBUFFhealth = _enemyBUFFhealth - _damage * _multiplyBlockEnemyHealth; 
-            if (_dragFactor.name == "Enemy_Food") _enemyBUFFfood = _enemyBUFFfood - _damage * _multiplyBlockEnemyFood; 
+            if (_dragFactor.name == "Enemy_Economic")
+            { 
+                _enemyBUFFeconomic = _enemyBUFFeconomic - _damage * _multiplyBlockEnemyEconomic - _costCard;
+                //_totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _damage * _multiplyBlockEnemyEconomic - _costCard; 
+            }
+            if (_dragFactor.name == "Enemy_Health")
+            {
+                _enemyBUFFhealth = _enemyBUFFhealth - _damage * _multiplyBlockEnemyHealth - _costCard;
+                //_totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _damage * _multiplyBlockEnemyHealth - _costCard;
+            }
+            if (_dragFactor.name == "Enemy_Food")
+            {
+                _enemyBUFFfood = _enemyBUFFfood - _damage * _multiplyBlockEnemyFood - _costCard;
+                //_totalMoralePresidentEnemy = _totalMoralePresidentEnemy - _damage * _multiplyBlockEnemyFood - _costCard; 
+            }
 
-            if (_dragFactor.name == "Our_Materials") _ourBUFFmaterial = _ourBUFFmaterial - _damage * _multiplyBlockOurMaterials; 
-            if (_dragFactor.name == "Our_Economic") _ourBUFFeconomic = _ourBUFFeconomic - _damage * _multiplyBlockOurEconomic;
-            if (_dragFactor.name == "Our_Health") _ourBUFFhealth = _ourBUFFhealth - _damage * _multiplyBlockOurHealth;
-            if (_dragFactor.name == "Our_Food") _ourBUFFfood = _ourBUFFfood - _damage * _multiplyBlockOurFood; 
+            if (_dragFactor.name == "Our_Materials")
+            {
+                _ourBUFFmaterial = _ourBUFFmaterial - _damage * _multiplyBlockOurMaterials - _costCard;
+            }
+            if (_dragFactor.name == "Our_Economic")
+            {
+                _ourBUFFeconomic = _ourBUFFeconomic - _damage * _multiplyBlockOurEconomic - _costCard;
+            }
+            if (_dragFactor.name == "Our_Health")
+            {
+                _ourBUFFhealth = _ourBUFFhealth - _damage * _multiplyBlockOurHealth - _costCard;
+            }
+            if (_dragFactor.name == "Our_Food")
+            {
+                _ourBUFFfood = _ourBUFFfood - _damage * _multiplyBlockOurFood - _costCard;
+            }
         }
 
         int _damage;
@@ -756,7 +827,6 @@ public class FightRules : MonoBehaviour
                 _damage = _ourBuffAttack / 2;
                 calcDamage(_damage);
             }
-
             else if (_idCard == "isolation")
             {
                 _damage = _ourBuffAttack / 3;
@@ -764,7 +834,8 @@ public class FightRules : MonoBehaviour
                 _enemyBUFFeconomic = _enemyBUFFeconomic - _damage * _multiplyBlockEnemyEconomic;
                 _enemyBUFFhealth = _enemyBUFFhealth - _damage * _multiplyBlockEnemyHealth;
                 _enemyBUFFfood = _enemyBUFFfood - _damage * _multiplyBlockEnemyFood;
-            }
+                _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - 4 * _damage; 
+            } 
         }
         else // если враг атакует 
         {
@@ -791,6 +862,7 @@ public class FightRules : MonoBehaviour
                 _ourBUFFeconomic = _ourBUFFeconomic - _damage * _multiplyBlockOurEconomic;
                 _ourBUFFhealth = _ourBUFFhealth - _damage * _multiplyBlockOurHealth;
                 _ourBUFFfood = _ourBUFFfood - _damage * _multiplyBlockOurFood;
+                _totalMoralePresident = _totalMoralePresident - 4 * _damage; 
             }
         }
     }
@@ -1088,7 +1160,7 @@ public class FightRules : MonoBehaviour
         }
     }
 
-public void ReadyFight() // рассчитывается 1 раз в начале при нажатии кнопки "Ready" 
+    public void ReadyFight() // рассчитывается 1 раз в начале при нажатии кнопки "Ready" 
     {
         calcLocationFactors();
 
@@ -1125,7 +1197,6 @@ public void ReadyFight() // рассчитывается 1 раз в начал�
         _PlaceFactorEnemy[2].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFeconomic; // хп экономики
         _PlaceFactorEnemy[3].transform.Find("Canvas").transform.GetComponentInChildren<Text>().text = "" + _enemyBUFFhealth; // хп здравоохранения 
 
-        // if (_totalMoralePresidentEnemy <= 0) // если враг проиграл
         if (_enemyBUFFmaterial + _enemyBUFFeconomic + _enemyBUFFhealth + _enemyBUFFfood <= 0 || _totalMoralePresidentEnemy <= 0) // если враг проиграл
         {
             DataHolder._winnerHolder = true;
@@ -1157,5 +1228,41 @@ public void ReadyFight() // рассчитывается 1 раз в начал�
     {
         File.WriteAllText(path, ""); // очистили файл 
         File.WriteAllText(path, _testText2); // записали в лог 
+    }
+
+    void TextForCard(Transform Card)
+    {
+        /*Debug.Log("_FightCardOnTable.Length " + _FightCardOnTable.Length);
+        Debug.Log("myItemListCard.fight_card.Length " + myItemListCard.fight_card.Length);
+        for (int i = 0; i < _FightCardOnTable.Length; i++) // пробежались по всем боевым картам 
+        {
+
+            for (int j = 0; j < myItemListCard.fight_card.Length; j++) // пробежались по всем картам из JSON-файла 
+            {
+
+                if (_FightCardOnTable[i].name == myItemListCard.fight_card[j].id) // нашли совпадения с картой из JSON 
+                {
+*/
+   
+        if (Card.name == "airStrike") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Will strike the enemy. Targets will hit successfully. Enemy will take " + (3 + _ourBuffAttack) + " Morale damage"; // прописали текст для каждой карты 
+        if (Card.name == "intelligenceData") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Scoting will pass valuable data about the movement of enemy troops. Damage from the next attack will be increased by " + (2 + _ourBuffAttack / 2);
+        if (Card.name == "sunction") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Your decision to impose sanctions will be supported by leaders from around the world. The next attack will cause additional damage to Morale, equal to half of the damage to Factor"; 
+        if (Card.name == "isolation") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "A possible isolation policy against the enemy will pay off. All Factors will take the damage " + (_ourBuffAttack/3); 
+
+        if (Card.name == "customsReform") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Customs control reform will enable more successful deals, but not everyone will be happy with it. The Economy Factor will not take the following damage, but your Morale will be reduced by 5 units"; 
+        if (Card.name == "militaryPosition") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Strategic facilities and raw material resources will be protected. But the citizens will be frightened. Raw resources will not take the damage from the next attack, but your Morale will be reduced by 5 units";
+        if (Card.name == "pestControl") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "You will be protecting crops from insects, the citizens won't be afraid of pesticides in their food. Food will not take the damage from the next attack, but your Morale will be reduced by 5 units"; 
+        if (Card.name == "accession") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "You will manage to negotiate alliances with other States. Not all citizens will support this course of action. All Factors will not take the damage from the next attack, but your Morale will be reduced by 10 units";
+                    
+        if (Card.name == "harvest") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "The agricultural sector will show excellent results. With a certain chance " + (10 + _ourBuffFortune) + "% you may get +10 to Morale, if you lose your Morale will be reduced by 5 units"; 
+        if (Card.name == "elections") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "You will hold an early election to prove to the opposition how much you are loved by the citizens. With a chance equal to " + (10 + _ourBUFFhealth) + "% you will get + 10 to Morale or - 5 to Morale"; 
+        if (Card.name == "techological") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "You will possess a technology that far ahead your competitors. Damage from attack cards will be increased by half your Luck. Economy consumption will be reduced by 2 units next turn"; 
+        if (Card.name == "educationalInfrastructure") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Your country's educational institutions will be known around the world. Your scientists will work on the first frontier of knowledge. On your next turn, any attack you make will give you Morale equal to 10% of the damage dealt";
+
+        if (Card.name == "patronage") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "You will provide customs concessions favorable for trading. There will be no point in attacking you. The chosen factor with " + _ourBuffDiplomation + "% will not take damage on the next 3 turns";
+        if (Card.name == "diplomaticImmunty") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "The powers of the world will favor you. Your resources will be protected for the next 3 turns. The probability of the successful attack on your food and raw resources will be reduced " + _ourBuffDiplomation + "%";
+        if (Card.name == "strategicLoan") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Lacking resources? You will take a loan of " + _ourBuffDiplomation + " for 2 turns. At the end of these turns, you will receive half of the loan as damage to the economy and health";
+        if (Card.name == "energyExpansion") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Half the world will be tied up in deals with your energy resources. The probability of missing the attack on your food and raw resources will be " + (40 + _ourBuffDiplomation) + "%"; 
+
     }
 }
