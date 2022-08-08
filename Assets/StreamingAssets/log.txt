@@ -1,3 +1,67 @@
 
+ OurMorale 131
+ MoraleEnemy 0
+ The opponent used the card customsReform to Food
+
+ OurMorale 131
+ MoraleEnemy 4
+ We used the card airStrike to Food
+
+ OurMorale 133
+ MoraleEnemy 32
+ The opponent used the card energyExpansion to Material
+
+ OurMorale 133
+ MoraleEnemy 36
+ We used the card intelligenceData to Food
+
+ OurMorale 137
+ MoraleEnemy 36
+ The opponent used the card energyExpansion to Health
+
+ OurMorale 137
+ MoraleEnemy 40
+ We used the card airStrike to Economic
+
+ OurMorale 139
+ MoraleEnemy 40
+ The opponent used the card customsReform to Economic
+
+ OurMorale 139
+ MoraleEnemy 47
+ We used the card intelligenceData to Economic
+
+ OurMorale 143
+ MoraleEnemy 47
+ The opponent used the card customsReform to Material
+
+ OurMorale 143
+ MoraleEnemy 54
+ We used the card airStrike to Material
+
+ OurMorale 145
+ MoraleEnemy 87
+ The opponent used the card harvest to Economic
+
+ OurMorale 145
+ MoraleEnemy 94
+ We used the card intelligenceData to Economic
+
+ OurMorale 149
+ MoraleEnemy 94
+ The opponent used the card accession to Food
+
+ OurMorale 149
+ MoraleEnemy 108
+ We used the card airStrike to Health
+
+ OurMorale 151
+ MoraleEnemy 145
+ The opponent used the card educationalInfrastructure to Food
+
+ OurMorale 151
+ MoraleEnemy 146
+ We used the card intelligenceData to Material
+
  OurMorale 155
  MoraleEnemy 146

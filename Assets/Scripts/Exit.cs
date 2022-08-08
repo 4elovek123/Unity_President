@@ -21,4 +21,9 @@ public class Exit : MonoBehaviour
         else _winResultText = "Loser";
         _canvasScene.transform.Find("ResultPanel").transform.Find("tokenHead").transform.GetComponent<Text>().text = _winResultText; 
     }
+
+    public void Quit()
+    {
+        Application.Quit();
+    }
 }
