@@ -8,14 +8,11 @@ using System.IO;
 public class FightRules : MonoBehaviour
 {
     Transform _GO1 = null;
-    Transform _GO2 = null; 
+    Transform _GO2 = null;
 
     public Transform _Table;
     public GameObject _Arrow;
     private bool _deactivateArrow = false;
-
-    public Factor_Item[] _FactorItemPresident = new Factor_Item[3];
-    public Factor_Item[] _FactorItemPresidentEnemy = new Factor_Item[3];
 
     int[] MoralePresident = new int[3];
     int[] MoralePresidentEnemy = new int[3];
@@ -24,8 +21,8 @@ public class FightRules : MonoBehaviour
     public Canvas _canvasCamera;
     public Camera _camera;
 
-    public Transform[] _Presidents_before;
-    public Transform[] _PresidentsEnemy_before;
+    public Transform[] _Presidents_Our;
+    public Transform[] _Presidents_Enemy;
     public Transform[] _Place_after;
     public Transform[] _PlaceEnemy_after;
 
@@ -60,6 +57,11 @@ public class FightRules : MonoBehaviour
     private int _enemyBUFFeconomicPrevious = 0;
     private int _enemyBUFFhealthPrevious = 0;
     private int _enemyBUFFfoodPrevious = 0; 
+
+    private int _buff_attack_delta = 0;
+    private int _buff_fortune_delta = 0;
+    private int _buff_protection_delta = 0;
+    private int _buff_diplomation_delta = 0;
 
     private int _damageOurAdd = 0;
     private int _damageEnemyAdd = 0;
@@ -122,15 +124,15 @@ public class FightRules : MonoBehaviour
     private int _economic_ability_attack = 0;
     private int _health_ability_protect = 0;
     private int _food_ability_protect = 0;
+    private int _food_ability_attack = 0;
 
     [TextArea]
     private string _testText1;  // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
     private string _testText2;  // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
     public Transform _scrollViewContent1; // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
     public Transform _scrollViewContent2; // ВРЕМЕННО, ЛОГ НА ЭКРАНЕ 
-    private AnimationClip PresidentAnimation;
 
-    private Transform[] ImageBuf = new Transform[3];
+    public Transform[] ImageBuf = new Transform[4];
     private Transform _hitLast = null;
 
     public Material _redBoom;
@@ -155,64 +157,13 @@ public class FightRules : MonoBehaviour
 
     private string path = Application.streamingAssetsPath + "/" + "log.txt"; // создали лог-файл 
 
-    void Start()
+    void Start() // заносим в массивы все карты сцены, места для карт за столом, выбираем рандомные, помещаем за стол 
     {
-
-    }
-
-    void StartAnimation()
-    {
-        for (int i = 0; i < _Presidents_before.Length; i++) // анимация президентов 
-        {
-            Animation anim = _Presidents_before[i].transform.GetComponent<Animation>();
-            anim.Play("PresidentAnimation");
-        }
-
-        for (int i = 0; i < _PresidentsEnemy_before.Length; i++) // анимация соперника  
-        {
-            Animation anim = _PresidentsEnemy_before[i].transform.GetComponent<Animation>();
-            anim.Play("PresidentAnimationEnemy");
-        }
-
-        for (int i = 0; i < _FightCardOnTable.Length; i++) // анимация боевых карточек
-        {
-            // Animation anim = _FightCardOnTable[i].transform.GetComponent<Animation>();
-            // anim.Play("FightCardStartAnimation"); 
-
-            Animator animatorOpen = _FightCardOnTable[i].transform.GetComponent<Animator>();
-            animatorOpen.SetBool("Start", true);
-
-        }
-
-        Animation animTable = _Table.transform.GetComponent<Animation>(); // анимируется стол 
-        animTable.Play("TableRotateAnimation");
-
-    }
-
-
-    void StartingForFactors()
-    {
-        _ourBUFFmaterialPrevious = _ourBUFFmaterial; // запоминаем предыдущее значение фактора до расчётов 
-        _ourBUFFeconomicPrevious = _ourBUFFeconomic;
-        _ourBUFFhealthPrevious = _ourBUFFhealth;
-        _ourBUFFfoodPrevious = _ourBUFFfood;
-
-        _enemyBUFFmaterialPrevious = _enemyBUFFmaterial; // запоминаем предыдущее значение фактора 
-        _enemyBUFFeconomicPrevious = _enemyBUFFeconomic;
-        _enemyBUFFhealthPrevious = _enemyBUFFhealth;
-        _enemyBUFFfoodPrevious = _enemyBUFFfood;
-    }
-
-    public void RandomFightCardToPlace() // заносим в массивы все карты сцены, места для карт за столом, выбираем рандомные, помещаем за стол. Рассчитывается при нажатии кнопки "Ready" 
-    {
-
         _FightCardInScene = new Transform[Folder_FightCardInScene.transform.childCount];
         for (int i = 0; i < _FightCardInScene.Length; i++) // пробежались по всем боевым картам в сцене в папке FightCardInScene (16 штук сейчас) 
         {
             _FightCardInScene[i] = Folder_FightCardInScene.transform.GetChild(i).transform; // занесли их в массив _FightCardInScene[]
         }
-
-
 
         _FightCardPlace = new Transform[Folder_FightCardPlace.transform.childCount];
         _FightCardOnTable = new Transform[_FightCardPlace.Length];
@@ -254,27 +205,106 @@ public class FightRules : MonoBehaviour
                 }
             }
         }
-        StartAnimation();
+        StartButton(); // выставляем карты президентов 
 
+        StartAnimation(); // анимация 
+    }
+
+    void StartAnimation()
+    {
+        for (int i = 0; i < _Presidents_Our.Length; i++) // анимация президентов 
+        {
+            Animation anim = _Presidents_Our[i].transform.GetComponent<Animation>();
+            anim.Play("PresidentAnimation");
+        }
+
+        for (int i = 0; i < _Presidents_Enemy.Length; i++) // анимация соперника  
+        {
+            Animation anim = _Presidents_Enemy[i].transform.GetComponent<Animation>();
+            anim.Play("PresidentAnimationEnemy");
+        }
+
+        for (int i = 0; i < _FightCardOnTable.Length; i++) // анимация боевых карточек
+        {
+            Animator animatorOpen = _FightCardOnTable[i].transform.GetComponent<Animator>();
+            animatorOpen.SetBool("Start", true);
+        }
+
+        Animation animTable = _Table.transform.GetComponent<Animation>(); // анимируется стол 
+        animTable.Play("TableRotateAnimation");
+
+    }
+
+
+    void StartingForFactors()
+    {
+        _ourBUFFmaterialPrevious = _ourBUFFmaterial; // запоминаем предыдущее значение фактора до расчётов 
+        _ourBUFFeconomicPrevious = _ourBUFFeconomic;
+        _ourBUFFhealthPrevious = _ourBUFFhealth;
+        _ourBUFFfoodPrevious = _ourBUFFfood;
+
+        _enemyBUFFmaterialPrevious = _enemyBUFFmaterial; // запоминаем предыдущее значение фактора 
+        _enemyBUFFeconomicPrevious = _enemyBUFFeconomic;
+        _enemyBUFFhealthPrevious = _enemyBUFFhealth;
+        _enemyBUFFfoodPrevious = _enemyBUFFfood;
     }
 
     public void StartButton() // выставляем карты президентов 
     {
-        for (int i = 0; i < _Presidents_before.Length; i++) // копируем свойства UI президентов на 3D карты президентов 
+        for (int i = 0; i < 3; i++) // копируем свойства UI президентов на 3D карты президентов 
         {
-            _Presidents_before[i].transform.SetParent(_Place_after[i]);
-            _Presidents_before[i].transform.localPosition = Vector3.zero;
-            _Presidents_before[i].transform.localRotation = Quaternion.identity;
-            //_Presidents_before[i].transform.localScale = Vector3.one;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_Level").GetComponent<Text>().text = "" + _FactorItemPresident[i]._level;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttack").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_attack;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortune").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_fortune;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtection").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_protection;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomation").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_diplomation;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttackDelta").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_attack_delta;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortuneDelta").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_fortune_delta;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtectionDelta").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_protection_delta;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomationDelta").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_diplomation_delta;
+            _Presidents_Our[i].transform.SetParent(_Place_after[i]);
+            _Presidents_Our[i].transform.localPosition = Vector3.zero;
+            _Presidents_Our[i].transform.localRotation = Quaternion.identity;
+
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_Level").GetComponent<Text>().text = "" + DataHolder._level[i];
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttack").GetComponent<Text>().text = "" + DataHolder._buff_attack[i];
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortune").GetComponent<Text>().text = "" + DataHolder._buff_fortune[i];
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtection").GetComponent<Text>().text = "" + DataHolder._buff_protection[i];
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomation").GetComponent<Text>().text = "" + DataHolder._buff_diplomation[i];
+            _buff_attack_delta = DataHolder._buff_attack_delta[i];
+            _buff_fortune_delta = DataHolder._buff_fortune_delta[i];
+            _buff_protection_delta = DataHolder._buff_protection_delta[i];
+            _buff_diplomation_delta = DataHolder._buff_diplomation_delta[i];
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttackDelta").GetComponent<Text>().text = "" + _buff_attack_delta;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortuneDelta").GetComponent<Text>().text = "" + _buff_fortune_delta;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtectionDelta").GetComponent<Text>().text = "" + _buff_protection_delta;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomationDelta").GetComponent<Text>().text = "" + _buff_diplomation_delta;
+            
+            _ourBUFFmaterial += DataHolder._BUFFmaterials[i];
+            _ourBUFFhealth += DataHolder._BUFFhealth[i];
+            _ourBUFFfood += DataHolder._BUFFfood[i];
+            _ourBUFFeconomic += DataHolder._BUFFeconomic[i];
+
+            _materials_ability_protect += DataHolder._materials_ability_protect[i];
+            _economic_ability_protect += DataHolder._economic_ability_protect[i];
+            _economic_ability_attack += DataHolder._economic_ability_attack[i];
+            _health_ability_protect += DataHolder._health_ability_protect[i];
+            _food_ability_protect += DataHolder._food_ability_protect[i];
+            _food_ability_attack += DataHolder._food_ability_attack[i];
+
+            _ourBuffAttack = _ourBuffAttack + DataHolder._buff_attack[i]; // суммируем атаки всех президентов
+            _ourBuffFortune = _ourBuffFortune + DataHolder._buff_fortune[i]; // суммируем атрибуты удачи всех президентов
+            _ourBuffDiplomation = _ourBuffDiplomation + DataHolder._buff_diplomation[i]; // суммируем атрибуты дипломатии всех президентов 
+
+            ImageBuf[0] = _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Image_BufAttack");
+            ImageBuf[1] = _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Image_BufFortune");
+            ImageBuf[2] = _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Image_BufProtection");
+            ImageBuf[3] = _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Image_BufDiplomation");
+
+            ColorRect(); // красим полоски у карт президентов 
+            /*
+
+            //_Presidents_before[i].transform.localScale = Vector3.one; 
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_Level").GetComponent<Text>().text = "" + _FactorItemPresident[i]._level;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttack").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_attack;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortune").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_fortune;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtection").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_protection;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomation").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_diplomation;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttackDelta").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_attack_delta;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortuneDelta").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_fortune_delta;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtectionDelta").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_protection_delta;
+            _Presidents_Our[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomationDelta").GetComponent<Text>().text = "" + _FactorItemPresident[i]._buff_diplomation_delta;
 
             _ourBUFFmaterial += _FactorItemPresident[i]._BUFFmaterials;
             _ourBUFFhealth += _FactorItemPresident[i]._BUFFhealth;
@@ -288,41 +318,56 @@ public class FightRules : MonoBehaviour
             _ourBuffAttack = _ourBuffAttack + _FactorItemPresident[i]._buff_attack; // суммируем атаки всех президентов
             _ourBuffFortune = _ourBuffFortune + _FactorItemPresident[i]._buff_fortune; // суммируем атрибуты удачи всех президентов
             _ourBuffDiplomation = _ourBuffDiplomation + _FactorItemPresident[i]._buff_diplomation; // суммируем атрибуты дипломатии всех президентов
+                    
 
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[0].color = _FactorItemPresident[i].ImageBuf[0].GetComponent<Image>().color;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[1].color = _FactorItemPresident[i].ImageBuf[1].GetComponent<Image>().color;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[2].color = _FactorItemPresident[i].ImageBuf[2].GetComponent<Image>().color;
-            _Presidents_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[3].color = _FactorItemPresident[i].ImageBuf[3].GetComponent<Image>().color;
+        */
         }
 
-        for (int i = 0; i < _PresidentsEnemy_before.Length; i++) // копируем свойства UI президентов на 3D карты президентов-противников 
+
+        for (int i = 0; i < 3; i++) // копируем свойства президентов из DataHolder в 3D карты президентов-противников 
         {
-            _PresidentsEnemy_before[i].transform.SetParent(_PlaceEnemy_after[i]);
-            _PresidentsEnemy_before[i].transform.localPosition = Vector3.zero;
-            _PresidentsEnemy_before[i].transform.localRotation = Quaternion.identity;
-            //_PresidentsEnemy_before[i].transform.localScale = Vector3.one;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_Level").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._level;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttack").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._buff_attack;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortune").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._buff_fortune;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtection").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._buff_protection;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomation").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._buff_diplomation;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttackDelta").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._buff_attack_delta;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortuneDelta").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._buff_fortune_delta;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtectionDelta").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._buff_protection_delta;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomationDelta").GetComponent<Text>().text = "" + _FactorItemPresidentEnemy[i]._buff_diplomation_delta;
+            _Presidents_Enemy[i].transform.SetParent(_PlaceEnemy_after[i]);
+            _Presidents_Enemy[i].transform.localPosition = Vector3.zero;
+            _Presidents_Enemy[i].transform.localRotation = Quaternion.identity;
+            //_PresidentsEnemy_before[i].transform.localScale = Vector3.one; 
 
-            _enemyBUFFmaterial += _FactorItemPresidentEnemy[i]._BUFFmaterials;
-            _enemyBUFFhealth += _FactorItemPresidentEnemy[i]._BUFFhealth;
-            _enemyBUFFfood += _FactorItemPresidentEnemy[i]._BUFFfood;
-            _enemyBUFFeconomic += _FactorItemPresidentEnemy[i]._BUFFeconomic;
-            _enemyBuffAttack = _enemyBuffAttack + _FactorItemPresidentEnemy[i]._buff_attack; // суммируем атаки всех президентов 
-            _enemyBuffFortune = _enemyBuffFortune + _FactorItemPresidentEnemy[i]._buff_fortune; // суммируем атрибуты удачи всех президентов
-            _enemyBuffDiplomation = _enemyBuffDiplomation + _FactorItemPresidentEnemy[i]._buff_diplomation; // суммируем атрибуты дипломатии всех президентов
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_Level").GetComponent<Text>().text = "" + DataHolder._level[i+3];
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttack").GetComponent<Text>().text = "" + DataHolder._buff_attack[i+3];
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortune").GetComponent<Text>().text = "" + DataHolder._buff_fortune[i+3];
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtection").GetComponent<Text>().text = "" + DataHolder._buff_protection[i+3];
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomation").GetComponent<Text>().text = "" + DataHolder._buff_diplomation[i+3];
+            _buff_attack_delta = DataHolder._buff_attack_delta[i+3];
+            _buff_fortune_delta = DataHolder._buff_fortune_delta[i+3];
+            _buff_protection_delta = DataHolder._buff_protection_delta[i+3];
+            _buff_diplomation_delta = DataHolder._buff_diplomation_delta[i+3];
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufAttackDelta").GetComponent<Text>().text = "" + _buff_attack_delta;
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufFortuneDelta").GetComponent<Text>().text = "" + _buff_fortune_delta;
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufProtectionDelta").GetComponent<Text>().text = "" + _buff_protection_delta;
+            _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Text_BufDiplomationDelta").GetComponent<Text>().text = "" + _buff_diplomation_delta; 
 
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[0].color = _FactorItemPresidentEnemy[i].ImageBuf[0].GetComponent<Image>().color;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[1].color = _FactorItemPresidentEnemy[i].ImageBuf[1].GetComponent<Image>().color;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[2].color = _FactorItemPresidentEnemy[i].ImageBuf[2].GetComponent<Image>().color;
-            _PresidentsEnemy_before[i].transform.GetComponentInChildren<Canvas>().transform.GetComponentsInChildren<Image>()[3].color = _FactorItemPresidentEnemy[i].ImageBuf[3].GetComponent<Image>().color;
+            _enemyBUFFmaterial += DataHolder._BUFFmaterials[i+3];
+            _enemyBUFFhealth += DataHolder._BUFFhealth[i+3];
+            _enemyBUFFfood += DataHolder._BUFFfood[i+3];
+            _enemyBUFFeconomic += DataHolder._BUFFeconomic[i+3];
+
+            _materials_ability_protect += DataHolder._materials_ability_protect[i+3];
+            _economic_ability_protect += DataHolder._economic_ability_protect[i+3];
+            _economic_ability_attack += DataHolder._economic_ability_attack[i+3];
+            _health_ability_protect += DataHolder._health_ability_protect[i+3];
+            _food_ability_protect += DataHolder._food_ability_protect[i+3];
+            _food_ability_attack += DataHolder._food_ability_attack[i+3];
+
+            _enemyBuffAttack = _enemyBuffAttack + DataHolder._buff_attack[i+3]; // суммируем атаки всех президентов 
+            _enemyBuffFortune = _enemyBuffFortune + DataHolder._buff_fortune[i+3]; // суммируем атрибуты удачи всех президентов
+            _enemyBuffDiplomation = _enemyBuffDiplomation + DataHolder._buff_diplomation[i+3];// суммируем атрибуты дипломатии всех президентов 
+
+            ImageBuf[0] = _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Image_BufAttack");
+            ImageBuf[1] = _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Image_BufFortune");
+            ImageBuf[2] = _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Image_BufProtection");
+            ImageBuf[3] = _Presidents_Enemy[i].transform.GetComponentInChildren<Canvas>().transform.Find("Image_BufDiplomation");
+
+            ColorRect(); // красим полоски у карт президентов 
+
         }
 
         StartingForFactors();
@@ -1244,12 +1289,11 @@ public class FightRules : MonoBehaviour
 
         for (int i = 0; i < 3; i++) // считаем мораль 
         {
-            MoralePresident[i] = _FactorItemPresident[i]._BUFFmaterials + _FactorItemPresident[i]._BUFFeconomic + _FactorItemPresident[i]._BUFFhealth + _FactorItemPresident[i]._BUFFfood;
+            MoralePresident[i] = DataHolder._BUFFmaterials[i] + DataHolder._BUFFeconomic[i] + DataHolder._BUFFhealth[i] + DataHolder._BUFFfood[i];
             _totalMoralePresident += MoralePresident[i];
-            MoralePresidentEnemy[i] = _FactorItemPresidentEnemy[i]._BUFFmaterials + _FactorItemPresidentEnemy[i]._BUFFeconomic + _FactorItemPresidentEnemy[i]._BUFFhealth + _FactorItemPresidentEnemy[i]._BUFFfood;
+            MoralePresidentEnemy[i] = DataHolder._BUFFmaterials[i+3] + DataHolder._BUFFeconomic[i+3] + DataHolder._BUFFhealth[i+3] + DataHolder._BUFFfood[i+3];
             _totalMoralePresidentEnemy += MoralePresidentEnemy[i];
         }
-
     }
 
     public void ReadyFight2() // Вывод нужных данных на экран 
@@ -1275,11 +1319,6 @@ public class FightRules : MonoBehaviour
         _totalMoralePresident = _totalMoralePresident - ((_ourBUFFmaterialPrevious - _ourBUFFmaterial) + (_ourBUFFeconomicPrevious - _ourBUFFeconomic) + (_ourBUFFhealthPrevious - _ourBUFFhealth) + (_ourBUFFfoodPrevious - _ourBUFFfood)); // Из нашей морали вычли изменения в факторах за ход противника 
         _totalMoralePresidentEnemy = _totalMoralePresidentEnemy - ((_enemyBUFFmaterialPrevious - _enemyBUFFmaterial) + (_enemyBUFFeconomicPrevious - _enemyBUFFeconomic) + (_enemyBUFFhealthPrevious - _enemyBUFFhealth) + (_enemyBUFFfoodPrevious - _enemyBUFFfood)); // Из морали врага вычли изменения в факторах за наш ход 
 
-        Debug.Log("_enemyBUFFmaterial delta " + (_enemyBUFFmaterialPrevious - _enemyBUFFmaterial));
-        Debug.Log("_enemyBUFFeconomic delta " + (_enemyBUFFeconomicPrevious - _enemyBUFFeconomic));
-        Debug.Log("_enemyBUFFhealth delta " + (_enemyBUFFhealthPrevious - _enemyBUFFhealth));
-        Debug.Log("_enemyBUFFfood delta " + (_enemyBUFFfoodPrevious - _enemyBUFFfood)); 
-        Debug.Log("");
 
         StartingForFactors(); // перезаписали факторы 
 
@@ -1312,7 +1351,7 @@ public class FightRules : MonoBehaviour
     IEnumerator Pause4() // пауза перед завершением 
     {
         yield return new WaitForSeconds(2.5f);
-        SceneManager.LoadScene(3);
+        SceneManager.LoadScene(2);
     }
     void SaveTXT() // пишем Лог 
     {
@@ -1343,5 +1382,46 @@ public class FightRules : MonoBehaviour
         if (Card.name == "strategicLoan") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Lacking resources? You will take a loan of " + _ourBuffDiplomation + " for 2 turns. At the end of these turns, you will receive half of the loan as damage to the economy and health";
         if (Card.name == "energyExpansion") Card.transform.GetComponentInChildren<Canvas>().transform.Find("Text").GetComponent<Text>().text = "Half the world will be tied up in deals with your energy resources. The probability of missing the attack on your food and raw resources will be " + (40 + _ourBuffDiplomation) + "%"; 
     
+    }
+
+    void ColorRect()
+    {
+
+        if (_buff_attack_delta > 0) // если параметр, влияющий на итоговый баф, положительный
+        {
+            ImageBuf[0].GetComponent<Image>().color = new Color(0, 1, 0); // зелёный 
+        }
+        else
+        {
+            if (_buff_attack_delta == 0) // если 0
+            {
+                ImageBuf[0].GetComponent<Image>().color = new Color(1, 1, 1); // белый
+            }
+            else // если он отрицательный 
+            {
+                ImageBuf[0].GetComponent<Image>().color = new Color(1, 0, 0); //красный
+            }
+        }
+
+        if (_buff_protection_delta > 0) ImageBuf[1].GetComponent<Image>().color = new Color(0, 1, 0); // если баф положительный
+        else
+        {
+            if (_buff_protection_delta == 0) ImageBuf[1].GetComponent<Image>().color = new Color(1, 1, 1);
+            else ImageBuf[1].GetComponent<Image>().color = new Color(1, 0, 0);
+        }
+
+        if (_buff_fortune_delta > 0) ImageBuf[2].GetComponent<Image>().color = new Color(0, 1, 0); // если баф положительный
+        else
+        {
+            if (_buff_fortune_delta == 0) ImageBuf[2].GetComponent<Image>().color = new Color(1, 1, 1); // если 0
+            else ImageBuf[2].GetComponent<Image>().color = new Color(1, 0, 0); // если отрицательный
+        }
+
+        if (_buff_diplomation_delta > 0) ImageBuf[3].GetComponent<Image>().color = new Color(0, 1, 0);// если баф положительный
+        else
+        {
+            if (_buff_diplomation_delta == 0) ImageBuf[3].GetComponent<Image>().color = new Color(1, 1, 1);
+            else ImageBuf[3].GetComponent<Image>().color = new Color(1, 0, 0);
+        }
     }
 }

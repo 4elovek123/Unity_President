@@ -5,14 +5,13 @@ using UnityEngine.EventSystems;
 using System.IO;
 using UnityEngine.UI;
 
-public class Factor_Slot : MonoBehaviour, IDropHandler
+public class Factor_Slot : MonoBehaviour, IDropHandler 
 {
-    private string DragItemName;
-    public JSONController jSONController; 
     public bool _targetDragIsTrue;
+    public Transform _selectPresident = null; 
 
     public void OnDrop(PointerEventData eventData) // при перетаскивании Фактора
     {
-        _targetDragIsTrue = true; 
+        _targetDragIsTrue = true;
     } 
 }
